@@ -1,27 +1,76 @@
-const callOllama = require("./ollamaClient");
+const callOpenRouter = require("./openRouterClient");
 
-async function generateResponse(course, userQuestion) {
+module.exports = async function generateResponse({
+  courses,
+  intent,
+  userMessage,
+  subIntent,
+}) {
+  // ✅ Normalize courses to always be an array
+  if (!Array.isArray(courses)) {
+    courses = [courses];
+  }
+
+  if (intent === "admission") {
+    return "Kindly contact the college admission office for the latest updates.";
+  }
+
+  const courseData = courses
+    .map((c) => {
+      let info = `Course Name: ${c.courseName}\n`;
+
+      if (intent === "fees") {
+        info += `
+Fees per Year: ${c.fees?.perYear ?? "Not available"} ${c.fees?.currency ?? ""}
+Fees per Semester: ${c.fees?.perSemester ?? "Not available"} ${c.fees?.currency ?? ""}
+Total Course Fee: ${c.fees?.totalCourse ?? "Not available"} ${c.fees?.currency ?? ""}
+`;
+      }
+
+      if (intent === "duration") {
+        info += `
+Duration: ${c.duration?.years ?? "?"} years
+Total Semesters: ${c.duration?.semesters ?? "?"}
+`;
+      }
+
+      if (intent === "eligibility") {
+        info += `
+Qualification: ${c.eligibility?.qualification ?? "Not available"}
+Minimum Percentage: ${c.eligibility?.minimumPercentage ?? "Not available"}%
+`;
+      }
+
+      if (intent === "deadline") {
+        info += `
+Admission Deadline: ${c.admissionDeadline ? new Date(c.admissionDeadline).toDateString() : "Not announced"}
+`;
+      }
+
+      return info;
+    })
+    .join("\n");
+
   const prompt = `
-You are a professional college admission chatbot.
+You are a college admission assistant.
 
-IMPORTANT RULES:
-- Answer ONLY using the data provided below
-- Do NOT add extra information
-- If data is missing, say it is not available
+Rules:
+- Answer ONLY about "${intent}"
+- Use ONLY the data provided
+- Do NOT guess
+- If the exact data is missing, say:
+"Kindly contact the college admission office for the latest updates."
 
-Course Data:
-Course Name: ${course.courseName}
-Department: ${course.department}
-Fees: ${course.fees}
-Duration: ${course.duration}
-Eligibility: ${course.eligibility}
-Deadline: ${course.deadline}
+DATA:
+${courseData}
 
 User Question:
-"${userQuestion}"
+"${userMessage}"
 `;
 
-  return await callOllama(prompt);
-}
-
-module.exports = generateResponse;
+  return callOpenRouter({
+    prompt,
+    temperature: 0,
+    max_tokens: 150,
+  });
+};

@@ -1,35 +1,62 @@
-const callOllama = require("./ollamaClient");
+const callOpenRouter = require("./openRouterClient");
 
-async function detectIntent(userMessage) {
+module.exports = async function detectIntent(userMessage) {
   const prompt = `
-You are an intent classification system for a college admission chatbot.
+Return ONLY valid JSON.
+No explanation. No markdown. No extra text.
 
-Classify the user question into ONE of the following intents:
-- fees
-- eligibility
-- duration
-- deadline
-- course_details
-- unknown
+Allowed intents:
+fees, eligibility, duration, deadline, course, admission, unknown
 
-Return ONLY valid JSON in this format:
+Allowed subIntents:
+- fees: perYear, perSemester, total
+- duration: years, semesters
+- others: null
+
+Rules:
+- If the user asks about semester-wise fees, use subIntent "perSemester"
+- If total or full course fees are asked, use subIntent "total"
+- If nothing specific is mentioned for fees, use subIntent "perYear"
+- If semesters are mentioned, use subIntent "semesters"
+- If no course is mentioned, return an empty array
+- Course names must be strings exactly as mentioned by the user
+
+JSON format:
 {
   "intent": "",
-  "courseName": ""
+  "subIntent": null,
+  "courseNames": []
 }
 
 User Question:
 "${userMessage}"
 `;
 
-  try {
-    console.log("Calling Ollama...");
-    const aiResponse = await callOllama(prompt);
-    console.log("RAW AI RESPONSE:", aiResponse);
-    return JSON.parse(aiResponse);
-  } catch (error) {
-    return { intent: "unknown", courseName: "" };
-  }
-}
+  const raw = await callOpenRouter({
+    prompt,
+    temperature: 0,
+    max_tokens: 120,
+    systemMessage:
+      "You are a strict intent classification engine. Output JSON only.",
+  });
 
-module.exports = detectIntent;
+  const jsonText = raw.match(/\{[\s\S]*\}/)?.[0];
+
+  if (!jsonText) {
+    return {
+      intent: "unknown",
+      subIntent: null,
+      courseNames: [],
+    };
+  }
+
+  try {
+    return JSON.parse(jsonText);
+  } catch (error) {
+    return {
+      intent: "unknown",
+      subIntent: null,
+      courseNames: [],
+    };
+  }
+};

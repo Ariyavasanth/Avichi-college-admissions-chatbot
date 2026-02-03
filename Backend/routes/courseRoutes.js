@@ -1,18 +1,22 @@
 const express = require("express");
-const { authMiddleware } = require("../middleware/authMiddleware");
 const {
   getAllCourses,
   createCourse,
   getCourseById,
   updateCourse,
-  deleteCourse,
+  deactivateCourse,
 } = require("../controllers/courseController");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+// 🔓 Public routes (Chatbot / Website)
 router.get("/", getAllCourses);
-router.post("/", authMiddleware, createCourse);
 router.get("/:id", getCourseById);
+
+// 🔐 Admin routes
+router.post("/", authMiddleware, createCourse);
 router.put("/:id", authMiddleware, updateCourse);
-router.delete("/:id", authMiddleware, deleteCourse);
+// router.patch("/:id/deactivate", authMiddleware, deactivateCourse);
 
 module.exports = router;

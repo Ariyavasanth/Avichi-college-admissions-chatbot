@@ -1,37 +1,39 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const authRoutes = require("./routes/authRoutes.js");
-const adminDashboardRoutes = require("./routes/adminDashboardRoutes.js");
-const courseRoutes = require("./routes/courseRoutes.js");
+const authRoutes = require("./routes/authRoutes");
+const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
+const courseRoutes = require("./routes/courseRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const connectDB = require("./config/Db");
 
 dotenv.config();
 
-// Database connection setup
-const connectDB = require("./config/Db.js");
-
 const app = express();
 
-// DB coonnetion establishment
-connectDB();
-
-// used to send the json data
+// Middleware
 app.use(express.json());
-
-// FIX: JSON + URL encoded should be ABOVE all routes
 app.use(express.urlencoded({ extended: true }));
 
-// AUTHENTICATION ROUTES
+// Health check
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", uptime: process.uptime() });
+});
+
+// Routes
 app.use("/api/admin/auth", authRoutes);
-
-// ADMIN DASHBOARD ROUTES
 app.use("/api/admin/dashboard", adminDashboardRoutes);
+app.use("/api/admin/courses", courseRoutes);
+app.use("/api", chatRoutes);
 
-app.use("/api/admin/coursemanagement", courseRoutes);
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR:", err.stack);
+  res.status(500).json({ message: "Internal Server Error" });
+});
 
-app.use("/api", require("./routes/chatRoutes"));
-
-// Port is listening
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on the port ${process.env.PORT}`);
+// Start server after DB connection
+connectDB().then(() => {
+  app.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`);
+  });
 });
