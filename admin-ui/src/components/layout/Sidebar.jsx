@@ -1,5 +1,6 @@
 import { Home, BookOpen, GraduationCap, ClipboardList } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import "../../styles/dashboard.css";
 
 const Sidebar = () => {
   return (
@@ -8,18 +9,40 @@ const Sidebar = () => {
 
       <nav>
         <ul>
-          <li className="active">
-            <Home size={18} /> <NavLink to="/">Dashboard</NavLink>
-          </li>
           <li>
-            <BookOpen size={18} />{" "}
-            <NavLink to="/courses">Course Management</NavLink>
+            <NavLink 
+              to="/" 
+              className={({ isActive }) => isActive ? "active" : ""}
+            >
+              <Home size={18} /> Dashboard
+            </NavLink>
           </li>
+
           <li>
-            <GraduationCap size={18} /> Scholarships
+            <NavLink 
+              to="/courses" 
+              className={({ isActive }) => isActive ? "active" : ""}
+            >
+              <BookOpen size={18} /> Course Management
+            </NavLink>
           </li>
+
           <li>
-            <ClipboardList size={18} /> Admission Process
+            <NavLink 
+              to="/scholarships" 
+              className={({ isActive }) => isActive ? "active" : ""}
+            >
+              <GraduationCap size={18} /> Scholarships
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink 
+              to="/admission" 
+              className={({ isActive }) => isActive ? "active" : ""}
+            >
+              <ClipboardList size={18} /> Admission Process
+            </NavLink>
           </li>
         </ul>
       </nav>
