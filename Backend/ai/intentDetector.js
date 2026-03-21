@@ -1,27 +1,25 @@
-const callOpenRouter = require("./openRouterClient");
+const callGemini = require("./gemini");
+
+// ✅ safer JSON extractor
+function extractJSON(text) {
+  try {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start === -1 || end === -1) return null;
+
+    return JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
 
 module.exports = async function detectIntent(userMessage) {
   const prompt = `
 Return ONLY valid JSON.
-No explanation. No markdown. No extra text.
 
 Allowed intents:
-fees,
-eligibility,
-duration,
-deadline,
-course,
-admission,
-
-college_name,
-college_timing,
-shifts,
-contact,
-email,
-address,
-location,
-website,
-
+fees, eligibility, duration, deadline, course, admission,
+college_name, college_timing, shifts, contact, email, address, location, website,
 unknown
 
 Allowed subIntents:
@@ -30,13 +28,12 @@ Allowed subIntents:
 - others: null
 
 Rules:
-- If the user asks about semester-wise fees, use subIntent "perSemester"
-- If total or full course fees are asked, use subIntent "total"
-- If nothing specific is mentioned for fees, use subIntent "perYear"
-- If semesters are mentioned, use subIntent "semesters"
+- If semester fees → "perSemester"
+- If total fees → "total"
+- Else default → "perYear"
+- If semesters mentioned → "semesters"
 - Institution-level intents do NOT require courseNames
-- If no course is mentioned for course-related intents, return an empty array
-- Course names must be strings exactly as mentioned by the user
+- If no course → return empty array
 
 JSON format:
 {
@@ -49,7 +46,7 @@ User Question:
 "${userMessage}"
 `;
 
-  const raw = await callOpenRouter({
+  const raw = await callGemini({
     prompt,
     temperature: 0,
     max_tokens: 150,
@@ -57,9 +54,9 @@ User Question:
       "You are a strict intent classification engine. Output JSON only.",
   });
 
-  const jsonText = raw.match(/\{[\s\S]*\}/)?.[0];
+  const parsed = extractJSON(raw);
 
-  if (!jsonText) {
+  if (!parsed) {
     return {
       intent: "unknown",
       subIntent: null,
@@ -67,13 +64,5 @@ User Question:
     };
   }
 
-  try {
-    return JSON.parse(jsonText);
-  } catch {
-    return {
-      intent: "unknown",
-      subIntent: null,
-      courseNames: [],
-    };
-  }
+  return parsed;
 };

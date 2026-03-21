@@ -1,4 +1,4 @@
-const callOpenRouter = require("./openRouterClient");
+const callGemini = require("./gemini");
 
 module.exports = async function generateResponse({
   courses,
@@ -6,71 +6,80 @@ module.exports = async function generateResponse({
   userMessage,
   subIntent,
 }) {
-  // ✅ Normalize courses to always be an array
+  // ✅ Normalize courses
   if (!Array.isArray(courses)) {
     courses = [courses];
   }
 
+  // ✅ Admission fallback
   if (intent === "admission") {
     return "Kindly contact the college admission office for the latest updates.";
   }
 
-  const courseData = courses
-    .map((c) => {
-      let info = `Course Name: ${c.courseName}\n`;
+  let response = "";
 
-      if (intent === "fees") {
-        info += `
-Fees per Year: ${c.fees?.perYear ?? "Not available"} ${c.fees?.currency ?? ""}
-Fees per Semester: ${c.fees?.perSemester ?? "Not available"} ${c.fees?.currency ?? ""}
-Total Course Fee: ${c.fees?.totalCourse ?? "Not available"} ${c.fees?.currency ?? ""}
-`;
+  for (const c of courses) {
+    if (!c) continue;
+
+    let info = `Course Name: ${c.courseName}\n`;
+
+    // ✅ FEES (with subIntent)
+    if (intent === "fees") {
+      if (subIntent === "perSemester") {
+        info += `Fees per Semester: ${c.fees?.perSemester ?? "Not available"} ${c.fees?.currency ?? ""}\n`;
+      } else if (subIntent === "total") {
+        info += `Total Course Fee: ${c.fees?.totalCourse ?? "Not available"} ${c.fees?.currency ?? ""}\n`;
+      } else {
+        info += `Fees per Year: ${c.fees?.perYear ?? "Not available"} ${c.fees?.currency ?? ""}\n`;
       }
+    }
 
-      if (intent === "duration") {
-        info += `
-Duration: ${c.duration?.years ?? "?"} years
-Total Semesters: ${c.duration?.semesters ?? "?"}
-`;
+    // ✅ DURATION
+    if (intent === "duration") {
+      if (subIntent === "semesters") {
+        info += `Total Semesters: ${c.duration?.semesters ?? "?"}\n`;
+      } else {
+        info += `Duration: ${c.duration?.years ?? "?"} years\n`;
       }
+    }
 
-      if (intent === "eligibility") {
-        info += `
-Qualification: ${c.eligibility?.qualification ?? "Not available"}
-Minimum Percentage: ${c.eligibility?.minimumPercentage ?? "Not available"}%
-`;
-      }
+    // ✅ ELIGIBILITY
+    if (intent === "eligibility") {
+      info += `Qualification: ${c.eligibility?.qualification ?? "Not available"}\n`;
+      info += `Minimum Percentage: ${c.eligibility?.minimumPercentage ?? "Not available"}%\n`;
+    }
 
-      if (intent === "deadline") {
-        info += `
-Admission Deadline: ${c.admissionDeadline ? new Date(c.admissionDeadline).toDateString() : "Not announced"}
-`;
-      }
+    // ✅ DEADLINE
+    if (intent === "deadline") {
+      info += `Admission Deadline: ${
+        c.admissionDeadline
+          ? new Date(c.admissionDeadline).toDateString()
+          : "Not announced"
+      }\n`;
+    }
 
-      return info;
-    })
-    .join("\n");
+    response += info + "\n";
+  }
 
+  // ✅ If DB has data → return directly (NO AI call)
+  if (response.trim()) {
+    return response.trim();
+  }
+
+  // ❌ If no data → fallback to AI
   const prompt = `
-You are a college admission assistant.
+You are a college assistant.
 
-Rules:
-- Answer ONLY about "${intent}"
-- Use ONLY the data provided
-- Do NOT guess
-- If the exact data is missing, say:
-"Kindly contact the college admission office for the latest updates."
-
-DATA:
-${courseData}
-
-User Question:
+Answer the question clearly:
 "${userMessage}"
+
+If unsure, say:
+"Kindly contact the college admission office for the latest updates."
 `;
 
-  return callOpenRouter({
+  return callGemini({
     prompt,
-    temperature: 0,
+    temperature: 0.3,
     max_tokens: 150,
   });
 };

@@ -8,9 +8,6 @@ const institutionRoutes = require("./routes/institutionRoutes");
 
 const cors = require("cors");
 
-
-
-
 const connectDB = require("./config/Db");
 
 dotenv.config();
@@ -20,9 +17,8 @@ const app = express();
 //cors configuration
 app.use(
   cors({
-    origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 // Middleware
@@ -41,7 +37,6 @@ app.use("/api/admin/courses", courseRoutes);
 app.use("/api", chatRoutes);
 
 app.use("/api/institution", institutionRoutes);
-
 
 // Global error handler
 app.use((err, req, res, next) => {
