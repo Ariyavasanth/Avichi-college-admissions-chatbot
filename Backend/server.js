@@ -1,52 +1,58 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
+
+// ⚠️ Load env FIRST before any module that needs process.env
+dotenv.config();
+
+const connectDB = require("./config/Db");
+
 const authRoutes = require("./routes/authRoutes");
 const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const institutionRoutes = require("./routes/institutionRoutes");
 
-const cors = require("cors");
-
-const connectDB = require("./config/Db");
-
-dotenv.config();
-
 const app = express();
 
-//cors configuration
+// ── CORS ──────────────────────────────────────────────────────────────
 app.use(
   cors({
+    origin: [
+      "http://localhost:5173", // admin-ui (Vite)
+      "http://localhost:5174", // chatbot-ui (Vite)
+      "http://localhost:5175", // ← add this
+    ],
     credentials: true,
-  }),
+  })
 );
 
-// Middleware
+// ── Body Parsers ───────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
+// ── Health Check ───────────────────────────────────────────────────────
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", uptime: process.uptime() });
 });
 
-// Routes
+// ── Routes ─────────────────────────────────────────────────────────────
 app.use("/api/admin/auth", authRoutes);
 app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/admin/courses", courseRoutes);
-app.use("/api", chatRoutes);
-
 app.use("/api/institution", institutionRoutes);
+app.use("/api", chatRoutes); // POST /api/chat
 
-// Global error handler
+// ── Global Error Handler ───────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err.stack);
   res.status(500).json({ message: "Internal Server Error" });
 });
 
-// Start server after DB connection
+// ── Start Server ───────────────────────────────────────────────────────
 connectDB().then(() => {
-  app.listen(process.env.PORT, () => {
-    console.log(`Server running on port ${process.env.PORT}`);
+  const PORT = process.env.PORT;
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
   });
 });

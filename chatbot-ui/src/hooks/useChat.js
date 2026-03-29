@@ -1,34 +1,46 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { sendChatMessage } from "../services/chatbot.service";
 
-export const useChat = () => {
-  const [messages, setMessages] = useState([
-    {
-      sender: "bot",
-      text: "Hello 👋 I am your CollegeBot. How can I help you today?",
-    },
-  ]);
+const WELCOME = {
+  sender: "bot",
+  text: "Hi! I'm the Avichi College Admission Assistant. Ask me about courses, fees, eligibility, or duration! 🎓",
+};
 
+export const useChat = () => {
+  const [messages, setMessages] = useState([WELCOME]);
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = async (input) => {
-    if (!input.trim()) return;
+  const sendMessage = async (text) => {
+    const trimmed = text?.trim();
+    if (!trimmed) return;
 
-    const userMessage = { sender: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
+    // a. Append user message
+    setMessages((prev) => [...prev, { sender: "user", text: trimmed }]);
+
+    // b. Show loading
+    setLoading(true);
 
     try {
-      setLoading(true);
-      const data = await sendChatMessage(input);
+      // c. Prepare history (last 6 messages)
+      const history = messages.slice(-6).map((m) => ({
+        role: m.sender === "bot" ? "bot" : "user",
+        text: m.text,
+      }));
 
-      const botMessage = { sender: "bot", text: data.reply };
-      setMessages((prev) => [...prev, botMessage]);
-    } catch (error) {
+      // d. Call API with history
+      const data = await sendChatMessage(trimmed, history);
+
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: "⚠️ Something went wrong." },
+        { sender: "bot", text: data.reply || "Sorry, I couldn't understand that." },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: "⚠️ Something went wrong. Please try again." },
       ]);
     } finally {
+      // e. Stop loading
       setLoading(false);
     }
   };

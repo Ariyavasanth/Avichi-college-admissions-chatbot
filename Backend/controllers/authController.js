@@ -20,6 +20,7 @@ exports.loginAdmin = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1d" },
     );
+    console.log(process.env.ACCESS_TOKEN_SECRET);
 
     res.json({
       success: true,

@@ -67,7 +67,7 @@ const courseSchema = new mongoose.Schema(
 
     admissionDeadline: {
       type: Date,
-      required: true,
+      required: false,
     },
 
   },

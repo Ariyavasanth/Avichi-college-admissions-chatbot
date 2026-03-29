@@ -1,52 +1,83 @@
-import { Home, BookOpen, GraduationCap, ClipboardList } from "lucide-react";
+import { useState } from "react";
+import { Home, BookOpen, Building2, GraduationCap, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import "../../styles/dashboard.css";
 
 const Sidebar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleSidebar = () => setIsOpen(!isOpen);
+  const closeSidebar = () => setIsOpen(false);
+
   return (
-    <div className="sidebar">
-      <h1 className="logo">Academic Chatbot</h1>
+    <>
+      {/* Mobile Hamburger Toggle - Visible only on mobile via CSS */}
+      <button className="menu-toggle" onClick={toggleSidebar}>
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-      <nav>
-        <ul>
-          <li>
-            <NavLink 
-              to="/" 
-              className={({ isActive }) => isActive ? "active" : ""}
-            >
-              <Home size={18} /> Dashboard
-            </NavLink>
-          </li>
+      {/* Sidebar Overlay - Closes sidebar on click */}
+      <div 
+        className={`sidebar-overlay ${isOpen ? "open" : ""}`} 
+        onClick={closeSidebar}
+      />
 
-          <li>
-            <NavLink 
-              to="/courses" 
-              className={({ isActive }) => isActive ? "active" : ""}
-            >
-              <BookOpen size={18} /> Course Management
-            </NavLink>
-          </li>
+      {/* Sidebar Navigation */}
+      <div className={`sidebar ${isOpen ? "open" : ""}`}>
+        {/* Top Branding Section */}
+        <div className="logo">
+          <GraduationCap size={20} color="white" />
+          <span>Avichi Admin</span>
+        </div>
 
-          <li>
-            <NavLink 
-              to="/scholarships" 
-              className={({ isActive }) => isActive ? "active" : ""}
-            >
-              <GraduationCap size={18} /> Scholarships
-            </NavLink>
-          </li>
+        {/* Main Navigation */}
+        <nav>
+          <ul>
+            <li>
+              <NavLink
+                to="/"
+                className={({ isActive }) => (isActive ? "active" : "")}
+                onClick={closeSidebar}
+              >
+                <Home size={17} /> Dashboard
+              </NavLink>
+            </li>
 
-          <li>
-            <NavLink 
-              to="/admission" 
-              className={({ isActive }) => isActive ? "active" : ""}
-            >
-              <ClipboardList size={18} /> Admission Process
-            </NavLink>
-          </li>
-        </ul>
-      </nav>
-    </div>
+            <li>
+              <NavLink
+                to="/courses"
+                className={({ isActive }) => (isActive ? "active" : "")}
+                onClick={closeSidebar}
+              >
+                <BookOpen size={17} /> Course Management
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink
+                to="/institution"
+                className={({ isActive }) => (isActive ? "active" : "")}
+                onClick={closeSidebar}
+              >
+                <Building2 size={17} /> Institution Details
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+
+        {/* Footer Section */}
+        <div style={{
+          marginTop: "auto",
+          padding: "16px 12px",
+          borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+          fontSize: "11px",
+          color: "rgba(255, 255, 255, 0.5)",
+          textAlign: "center"
+        }}>
+          Avichi College © 2025
+        </div>
+      </div>
+    </>
   );
 };
 

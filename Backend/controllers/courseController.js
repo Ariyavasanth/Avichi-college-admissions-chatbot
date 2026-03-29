@@ -47,7 +47,6 @@ exports.createCourse = async (req, res) => {
       durationYears,
       eligibilityQualification,
       eligibilityPercentage,
-      admissionDeadline,
     } = req.body;
 
     // ✅ Validation
@@ -57,8 +56,7 @@ exports.createCourse = async (req, res) => {
       !perYearFee ||
       !durationYears ||
       !eligibilityQualification ||
-      !eligibilityPercentage ||
-      !admissionDeadline
+      !eligibilityPercentage
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -85,7 +83,6 @@ exports.createCourse = async (req, res) => {
         qualification: eligibilityQualification,
         minimumPercentage: eligibilityPercentage,
       },
-      admissionDeadline,
     });
 
     res.status(201).json({

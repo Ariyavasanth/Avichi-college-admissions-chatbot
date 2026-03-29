@@ -1,30 +1,27 @@
 const mongoose = require("mongoose");
+
 const InstitutionSchema = new mongoose.Schema(
   {
     institutionName: { type: String, required: true },
-
-    timings: {
-      morningShift: String,
-      eveningShift: String,
-      general: String,
-    },
-
     contactDetails: {
-      phone: String,
-      email: String,
-      website: String,
+      phone: { type: String },
+      email: { type: String },
+      website: { type: String },
       address: {
-        text: String,
-        mapLink: String,
+        text: { type: String },
       },
     },
-
+    timings: {
+      morningShift: { type: String },
+      eveningShift: { type: String },
+      general: { type: String },
+    },
     lastUpdatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Institution", InstitutionSchema);

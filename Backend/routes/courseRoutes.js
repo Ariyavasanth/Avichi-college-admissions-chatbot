@@ -4,7 +4,7 @@ const {
   createCourse,
   getCourseById,
   updateCourse,
-  deactivateCourse,
+  deleteCourse,
 } = require("../controllers/courseController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 
@@ -17,6 +17,6 @@ router.get("/:id", getCourseById);
 // 🔐 Admin routes
 router.post("/", authMiddleware, createCourse);
 router.put("/:id", authMiddleware, updateCourse);
-// router.patch("/:id/deactivate", authMiddleware, deactivateCourse);
+router.delete("/:id", authMiddleware, deleteCourse);
 
 module.exports = router;

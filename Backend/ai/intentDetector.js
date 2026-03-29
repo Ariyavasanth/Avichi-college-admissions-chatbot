@@ -1,10 +1,13 @@
 const callGemini = require("./gemini");
 
-// ✅ safer JSON extractor
+/**
+ * Extract JSON safely
+ */
 function extractJSON(text) {
   try {
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
+
     if (start === -1 || end === -1) return null;
 
     return JSON.parse(text.slice(start, end + 1));
@@ -13,56 +16,90 @@ function extractJSON(text) {
   }
 }
 
-module.exports = async function detectIntent(userMessage) {
+/**
+ * Advanced intent detection with memory + pronoun resolution
+ */
+module.exports = async function detectIntent({
+  userMessage,
+  history = [],
+}) {
+  // 🔥 Build structured conversation history
+  const historyText = history
+    .slice(-6)
+    .map((m) =>
+      `${m.role === "user" ? "User" : "Assistant"}: ${m.text}`
+    )
+    .join("\n");
+
   const prompt = `
-Return ONLY valid JSON.
+You are an intelligent intent classification engine.
 
-Allowed intents:
-fees, eligibility, duration, deadline, course, admission,
-college_name, college_timing, shifts, contact, email, address, location, website,
-unknown
+STRICT RULES:
+- Return ONLY valid JSON.
+- Do NOT add explanation.
+- Do NOT add text outside JSON.
 
-Allowed subIntents:
-- fees: perYear, perSemester, total
-- duration: years, semesters
-- others: null
+ALLOWED INTENTS:
+admission, eligibility, duration, fees, course, deadline,
+college_name, college_timing, contact, location, website,
+greeting, thanks, unknown
 
-Rules:
-- If semester fees → "perSemester"
-- If total fees → "total"
-- Else default → "perYear"
-- If semesters mentioned → "semesters"
-- Institution-level intents do NOT require courseNames
-- If no course → return empty array
+ALLOWED SUBINTENTS:
+- fees → perYear, perSemester, total
+- duration → years, semesters
+- others → null
 
-JSON format:
+INTELLIGENCE RULES:
+1. Use conversation history to resolve references like:
+   "it", "its", "that", "they", "this"
+2. Always detect the FINAL user intent.
+3. If user says:
+   "What is its fee?" → map to previous course
+4. If no course found → return empty array []
+
+CONVERSATION HISTORY:
+${historyText}
+
+CURRENT USER MESSAGE:
+${userMessage}
+
+OUTPUT FORMAT:
 {
-  "intent": "",
-  "subIntent": null,
-  "courseNames": []
+  "intent": "...",
+  "subIntent": "...",
+  "courseNames": ["..."]
 }
-
-User Question:
-"${userMessage}"
 `;
 
-  const raw = await callGemini({
-    prompt,
-    temperature: 0,
-    max_tokens: 150,
-    systemMessage:
-      "You are a strict intent classification engine. Output JSON only.",
-  });
+  try {
+    const raw = await callGemini({
+      prompt,
+      temperature: 0,
+      max_tokens: 150,
+      systemMessage:
+        "You are a strict JSON-only intent classifier. Never output anything except JSON.",
+      history, // 🔥 helps model consistency
+    });
 
-  const parsed = extractJSON(raw);
+    const parsed = extractJSON(raw);
 
-  if (!parsed) {
+    if (!parsed) {
+      return {
+        intent: "unknown",
+        subIntent: null,
+        courseNames: [],
+      };
+    }
+
+    return parsed;
+
+  } catch (err) {
+    console.error("Intent detection failed:", err.message);
+
     return {
       intent: "unknown",
       subIntent: null,
       courseNames: [],
     };
   }
-
-  return parsed;
 };

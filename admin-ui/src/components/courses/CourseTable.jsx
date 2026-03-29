@@ -1,4 +1,12 @@
-const CourseTable = ({ courses, loading }) => {
+import "../../styles/courseManagement.css";
+
+const CourseTable = ({ courses, loading, onEdit, onDelete }) => {
+  const handleDeleteClick = (id) => {
+    if (window.confirm("Delete this course?")) {
+      onDelete(id);
+    }
+  };
+
   return (
     <div className="table-wrapper">
       <table>
@@ -9,7 +17,6 @@ const CourseTable = ({ courses, loading }) => {
             <th>Fees</th>
             <th>Duration</th>
             <th>Eligibility</th>
-            <th>Deadline</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -17,11 +24,15 @@ const CourseTable = ({ courses, loading }) => {
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan="6">Loading...</td>
+              <td colSpan="6" style={{ textAlign: "center", color: "#9ca3af", padding: "40px" }}>
+                Loading Courses…
+              </td>
             </tr>
           ) : courses.length === 0 ? (
             <tr>
-              <td colSpan="6">No Courses Found</td>
+              <td colSpan="6" style={{ textAlign: "center", color: "#9ca3af", padding: "40px" }}>
+                No Courses Found
+              </td>
             </tr>
           ) : (
             courses.map((course) => (
@@ -30,17 +41,30 @@ const CourseTable = ({ courses, loading }) => {
                   <strong>{course.courseName}</strong>
                 </td>
                 <td>{course.department}</td>
-                <td>₹{course.fees?.perYear?.toLocaleString()}</td>
-                <td>{course.duration?.years} Years</td>
+                <td>₹{course.fees?.perYear?.toLocaleString() || course.perYearFee?.toLocaleString()}</td>
+                <td>{course.duration?.years || course.durationYears} Yrs</td>
                 <td>
-                  {course.eligibility?.qualification}
+                  {course.eligibility?.qualification || course.eligibilityQualification}
                   <br />
-                  Min: {course.eligibility?.minimumPercentage}%
+                  <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                    Min: {course.eligibility?.minimumPercentage || course.eligibilityPercentage}%
+                  </span>
                 </td>
                 <td>
-                  {new Date(course.admissionDeadline).toLocaleDateString(
-                    "en-IN",
-                  )}
+                  <div className="action-btns">
+                    <button
+                      className="edit-btn"
+                      onClick={() => onEdit(course)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDeleteClick(course._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))

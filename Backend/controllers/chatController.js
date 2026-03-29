@@ -3,163 +3,61 @@ const Institution = require("../model/Institution");
 const detectIntent = require("../ai/intentDetector");
 const generateResponse = require("../ai/responseGenerator");
 
+/**
+ * Main Chat API Controller
+ * Orchestrates: Intent Detection -> Data Fetching -> AI Response Generation
+ */
 exports.chat = async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, history = [] } = req.body;
 
-    console.log("User:", message);
-
-    /* ======================================================
-       1️⃣ Validate Input
-    ====================================================== */
+    // 1️⃣ Validate Input
     const userMessage = message?.trim();
-
     if (!userMessage) {
-      return res.json({ reply: "Please enter a valid question." });
+      return res.json({ reply: "Hello! How can I assist you with Avichi College's admission process today?" });
     }
 
-    /* ======================================================
-       2️⃣ Detect Intent + Entities
-    ====================================================== */
-    const { intent, subIntent, courseNames } = await detectIntent(message);
+    // 2️⃣ Prepare Context for Intent Detection (to resolve pronouns like "that", "it")
+    const lastHistory = (history || []).slice(-4);
+    const contextString = lastHistory.length > 0
+      ? `PREVIOUS CONVERSATION:\n${lastHistory.map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.text}`).join("\n")}\nLATEST USER MESSAGE: ${userMessage}`
+      : `LATEST USER MESSAGE: ${userMessage}`;
 
-    console.log("Intent:", intent);
-    console.log("SubIntent:", subIntent);
-    console.log("Courses:", courseNames);
+    // 3️⃣ Detect Intent & Entities using AI
+    const { intent, subIntent, courseNames = [] } = await detectIntent(contextString);
+    console.log(`[AI-INTENT] Intent: ${intent} | Course Entity: ${courseNames}`);
 
-    const institutionIntents = [
-      "college_name",
-      "college_timing",
-      "shifts",
-      "contact",
-      "email",
-      "address",
-      "location",
-      "website",
-    ];
+    // 4️⃣ Unified Data Fetching: Institution & Courses
+    // Always fetch institution details to provide context for AI (location, contact info, timing)
+    const institution = await Institution.findOne();
 
-    /* ======================================================
-       3️⃣ Unknown / Unsupported Queries
-    ====================================================== */
-    if (intent === "unknown") {
-      return res.json({
-        reply:
-          "I can help with course details like fees, eligibility, duration, and admission deadlines.",
+    // Fetch courses if specific ones are mentioned (either directly or via pronoun resolution)
+    let courses = [];
+    if (courseNames && courseNames.length > 0) {
+      // Use $in with case-insensitive regex for robust matching
+      courses = await Course.find({
+        courseName: {
+          $in: courseNames.map(name => new RegExp(`${name.trim()}`, "i")),
+        },
       });
     }
 
-    /* ======================================================
-       4️⃣ Admission Queries (STRICT BLOCK)
-    ====================================================== */
-    if (intent === "admission") {
-      return res.json({
-        reply:
-          "For admission-related queries, please contact the college admission office directly.",
-      });
-    }
-
-    /* ======================================================
-   🏛 Institution-Level Queries (NO AI)
-====================================================== */
-    if (institutionIntents.includes(intent)) {
-      const institution = await Institution.findOne();
-
-      if (!institution) {
-        return res.json({
-          reply:
-            "Institution details are not available at the moment. Please contact the college office.",
-        });
-      }
-
-      let reply = "";
-
-      switch (intent) {
-        case "college_name":
-          reply = institution.institutionName;
-          break;
-
-        case "college_timing":
-          reply =
-            institution.timings?.general ||
-            `Morning: ${institution.timings?.morningShift || "N/A"}
-Evening: ${institution.timings?.eveningShift || "N/A"}`;
-          break;
-
-        case "shifts":
-          reply = `Total Shifts: ${institution.totalShifts ?? "Not specified"}`;
-          break;
-
-        case "contact":
-          reply = `Phone: ${institution.contactDetails?.phoneNumbers?.join(", ") || "N/A"}
-Email: ${institution.contactDetails?.emailAddresses?.join(", ") || "N/A"}`;
-          break;
-
-        case "email":
-          reply =
-            institution.contactDetails?.emailAddresses?.join(", ") ||
-            "Not available";
-          break;
-
-        case "address":
-        case "location":
-          reply =
-            institution.contactDetails?.address || "Address not available";
-          break;
-
-        case "website":
-          reply =
-            institution.contactDetails?.website || "Website not available";
-          break;
-      }
-
-      return res.json({ reply });
-    }
-
-    /* ======================================================
-       5️⃣ Validate Course Mention
-    ====================================================== */
-    if (!courseNames || courseNames.length === 0) {
-      return res.json({
-        reply:
-          "Please mention the course name you are asking about (e.g., BCA, BBA, BSc Visual Communication).",
-      });
-    }
-
-    /* ======================================================
-       6️⃣ Fetch Courses (Case-insensitive, partial-safe)
-    ====================================================== */
-    const courses = await Course.find({
-      isActive: true,
-      courseName: {
-        $in: courseNames.map((name) => new RegExp(`^${name}$`, "i")),
-      },
-    });
-
-    if (!courses || courses.length === 0) {
-      return res.json({
-        reply:
-          "Sorry, I couldn’t find details for the mentioned course(s). Please check the course name.",
-      });
-    }
-
-    /* ======================================================
-       7️⃣ Generate Answer (DB → Rules → AI)
-    ====================================================== */
+    // 5️⃣ Generate Professional Response (Cohesive AI-driven flow)
     const reply = await generateResponse({
       courses,
+      institution,
       intent,
       subIntent,
-      userMessage: message,
+      userMessage,
+      history,
     });
 
-    /* ======================================================
-       8️⃣ Send Response
-    ====================================================== */
+    // 6️⃣ Send Final Answer
     res.json({ reply });
   } catch (error) {
-    console.error("CHATBOT ERROR:", error);
+    console.error("CHATBOT FATAL ERROR:", error);
     res.status(500).json({
-      reply: "Something went wrong. Please try again later.",
+      reply: "I apologize, but I'm having some technical difficulty accessing our records right now. Please reach out to the Avichi College office directly.",
     });
   }
 };
