@@ -1,11 +1,8 @@
-const Course = require("../model/Course");
-const Institution = require("../model/Institution");
-const detectIntent = require("../ai/intentDetector");
-const generateResponse = require("../ai/responseGenerator");
+const ragService = require("../ai/ragService");
 
 /**
- * Main Chat API Controller
- * Orchestrates: Intent Detection -> Data Fetching -> AI Response Generation
+ * Main Chat API Controller (RAG Version)
+ * Orchestrates: User Query -> Embedding -> Atlas Vector Search -> Gemini Response
  */
 exports.chat = async (req, res) => {
   try {
@@ -14,50 +11,27 @@ exports.chat = async (req, res) => {
     // 1️⃣ Validate Input
     const userMessage = message?.trim();
     if (!userMessage) {
-      return res.json({ reply: "Hello! How can I assist you with Avichi College's admission process today?" });
+      return res.json({ reply: "Hello! How can I assist you with Avichi College admissions today?" });
     }
 
-    // 2️⃣ Prepare Context for Intent Detection (to resolve pronouns like "that", "it")
-    const lastHistory = (history || []).slice(-4);
-    const contextString = lastHistory.length > 0
-      ? `PREVIOUS CONVERSATION:\n${lastHistory.map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.text}`).join("\n")}\nLATEST USER MESSAGE: ${userMessage}`
-      : `LATEST USER MESSAGE: ${userMessage}`;
+    // 2️⃣ Perform RAG-based search and response generation
+    // This replaces manual Intent Detection + Entity Fetching
+    const reply = await ragService.answerQuery(userMessage, history);
 
-    // 3️⃣ Detect Intent & Entities using AI
-    const { intent, subIntent, courseNames = [] } = await detectIntent(contextString);
-    console.log(`[AI-INTENT] Intent: ${intent} | Course Entity: ${courseNames}`);
-
-    // 4️⃣ Unified Data Fetching: Institution & Courses
-    // Always fetch institution details to provide context for AI (location, contact info, timing)
-    const institution = await Institution.findOne();
-
-    // Fetch courses if specific ones are mentioned (either directly or via pronoun resolution)
-    let courses = [];
-    if (courseNames && courseNames.length > 0) {
-      // Use $in with case-insensitive regex for robust matching
-      courses = await Course.find({
-        courseName: {
-          $in: courseNames.map(name => new RegExp(`${name.trim()}`, "i")),
-        },
-      });
-    }
-
-    // 5️⃣ Generate Professional Response (Cohesive AI-driven flow)
-    const reply = await generateResponse({
-      courses,
-      institution,
-      intent,
-      subIntent,
-      userMessage,
-      history,
-    });
-
-    // 6️⃣ Send Final Answer
+    // 3️⃣ Send Final Answer
     res.json({ reply });
+
   } catch (error) {
-    console.error("CHATBOT FATAL ERROR:", error);
-    res.status(500).json({
-      reply: "I apologize, but I'm having some technical difficulty accessing our records right now. Please reach out to the Avichi College office directly.",
-    });
+    console.error("CHATBOT RAG ERROR:", error);
+    
+    // Generic error handling
+    let errorMessage = "I'm having difficulty accessing our admission records right now. Please try again or contact the Avichi College office.";
+    
+    // Check if error is related to Vector Search index not being created yet
+    if (error.message.includes("$vectorSearch")) {
+      errorMessage = "I'm currently being updated to a new brain! Please inform the admin that the 'vector_index' needs to be created in Atlas.";
+    }
+
+    res.status(500).json({ reply: errorMessage });
   }
 };
