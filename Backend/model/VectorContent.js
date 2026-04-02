@@ -10,12 +10,12 @@ const vectorContentSchema = new mongoose.Schema(
     embedding: {
       type: [Number],
       required: true,
-      // 1536 dimensions for OpenAI text-embedding-3-small
+      // 768 dimensions for Gemini gemini-embedding-001
       validate: {
         validator: function (v) {
-          return v.length === 1536;
+          return v.length === 768;
         },
-        message: "Embedding must be 1536 dimensions",
+        message: "Embedding must be 768 dimensions",
       },
     },
     type: {

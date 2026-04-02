@@ -12,6 +12,7 @@ const CourseModal = ({ onClose, onSuccess, course }) => {
     durationYears: "",
     eligibilityQualification: "",
     eligibilityPercentage: "",
+    availableSeats: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,7 @@ const CourseModal = ({ onClose, onSuccess, course }) => {
         durationYears: course.duration?.years || "",
         eligibilityQualification: course.eligibility?.qualification || "",
         eligibilityPercentage: course.eligibility?.minimumPercentage || "",
+        availableSeats: course.availableSeats || 0,
       });
     }
   }, [course]);
@@ -46,6 +48,7 @@ const CourseModal = ({ onClose, onSuccess, course }) => {
       perYearFee: Number(formData.perYearFee),
       durationYears: Number(formData.durationYears),
       eligibilityPercentage: Number(formData.eligibilityPercentage),
+      availableSeats: Number(formData.availableSeats),
     };
 
     try {
@@ -141,6 +144,18 @@ const CourseModal = ({ onClose, onSuccess, course }) => {
                 placeholder="e.g. 12th Std"
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label>Available Seats *</label>
+            <input
+              type="number"
+              name="availableSeats"
+              value={formData.availableSeats}
+              onChange={handleChange}
+              required
+              placeholder="e.g. 60"
+            />
           </div>
 
           <div className="modal-actions">

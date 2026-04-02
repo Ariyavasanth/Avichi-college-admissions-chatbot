@@ -1,6 +1,6 @@
 const VectorContent = require("../model/VectorContent");
 const embeddingService = require("./embeddingService");
-const callGemini = require("./gemini");
+const callAI = require("./openrouter");
 
 /**
  * RAG Service
@@ -65,8 +65,8 @@ PROVIDED DATA:
 ${contextText || "No specific data found for this query."}
 `;
 
-      // 5️⃣ Call Gemini with grounded context
-      const reply = await callGemini({
+      // 5️⃣ Call OpenRouter LLM with grounded context
+      const reply = await callAI({
         prompt: userQuery,
         systemMessage,
         history,

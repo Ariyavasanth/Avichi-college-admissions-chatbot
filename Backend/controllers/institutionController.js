@@ -1,4 +1,5 @@
 const Institution = require('../model/Institution');
+const vectorSyncService = require('../ai/vectorSyncService');
 
 //GET institutions details
 exports.getInstitution  = async (req,res) =>{
@@ -24,6 +25,9 @@ exports.upsertInstitution = async (req, res) => {
       data,
       { new: true, upsert: true }
     );
+
+    // 🚀 Sync with Vector DB
+    await vectorSyncService.syncInstitution(institution);
 
     res.json({ message: "Institution details saved", institution });
   } catch (err) {

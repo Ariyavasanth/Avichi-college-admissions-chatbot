@@ -1,4 +1,5 @@
 const Course = require("../model/Course");
+const vectorSyncService = require("../ai/vectorSyncService");
 
 /* ======================================================
    GET ALL ACTIVE COURSES
@@ -47,6 +48,7 @@ exports.createCourse = async (req, res) => {
       durationYears,
       eligibilityQualification,
       eligibilityPercentage,
+      availableSeats,
     } = req.body;
 
     // ✅ Validation
@@ -56,7 +58,8 @@ exports.createCourse = async (req, res) => {
       !perYearFee ||
       !durationYears ||
       !eligibilityQualification ||
-      !eligibilityPercentage
+      !eligibilityPercentage ||
+      availableSeats === undefined
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -83,7 +86,11 @@ exports.createCourse = async (req, res) => {
         qualification: eligibilityQualification,
         minimumPercentage: eligibilityPercentage,
       },
+      availableSeats: Number(availableSeats),
     });
+
+    // 🚀 Sync with Vector DB
+    await vectorSyncService.syncCourse(course);
 
     res.status(201).json({
       message: "Course created successfully",
@@ -110,6 +117,7 @@ exports.updateCourse = async (req, res) => {
       eligibilityQualification,
       eligibilityPercentage,
       admissionDeadline,
+      availableSeats,
     } = req.body;
 
     let updateData = {};
@@ -139,6 +147,10 @@ exports.updateCourse = async (req, res) => {
       };
     }
 
+    if (availableSeats !== undefined) {
+      updateData.availableSeats = Number(availableSeats);
+    }
+
     const course = await Course.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
@@ -147,6 +159,9 @@ exports.updateCourse = async (req, res) => {
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
+
+    // 🚀 Sync with Vector DB
+    await vectorSyncService.syncCourse(course);
 
     res.status(200).json({
       message: "Course updated successfully",
@@ -173,6 +188,9 @@ exports.deleteCourse = async (req, res) => {
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
+
+    // 🚀 Sync with Vector DB (Remove from vector storage)
+    await vectorSyncService.deleteCourse(id);
 
     res.status(200).json({
       message: "Course deleted permanently",

@@ -69,6 +69,12 @@ const courseSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    
+    availableSeats: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
 
   },
   {

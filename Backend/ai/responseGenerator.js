@@ -1,4 +1,4 @@
-const callGemini = require("./gemini");
+const callAI = require("./openrouter");
 
 /**
  * Generates a professional, conversational, and context-aware response
@@ -77,7 +77,7 @@ Be smart, natural, and context-aware like ChatGPT.
 
   // 3️⃣ Call Gemini with MEMORY (IMPORTANT FIX)
   try {
-    const reply = await callGemini({
+    const reply = await callAI({
       prompt: userMessage,
       systemMessage,
       history, // 🔥 THIS ENABLES CONTEXT MEMORY
