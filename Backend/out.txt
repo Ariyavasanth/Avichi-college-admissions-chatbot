@@ -1,0 +1,14 @@
+﻿[dotenv@17.3.1] injecting env (6) from .env -- tip: ≡ƒñû agentic secret storage: https://dotenvx.com/as2
+SUPPORTED EMBEDDING MODELS:
+models/gemini-embedding-001 [
+  'embedContent',
+  'countTextTokens',
+  'countTokens',
+  'asyncBatchEmbedContent'
+]
+models/gemini-embedding-2-preview [
+  'embedContent',
+  'countTextTokens',
+  'countTokens',
+  'asyncBatchEmbedContent'
+]

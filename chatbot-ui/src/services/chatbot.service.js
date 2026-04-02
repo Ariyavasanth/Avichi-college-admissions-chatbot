@@ -11,7 +11,8 @@ export const sendChatMessage = async (message, history) => {
 
   if (!res.ok) {
     throw new Error("Failed to fetch response");
-  }
+  } 
 
   return res.json();
 };
+

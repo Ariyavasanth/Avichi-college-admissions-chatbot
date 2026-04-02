@@ -59,7 +59,7 @@ RESPONSE:
 
     if (msg.includes("400") || msg.includes("403")) {
       msg = "Gemini API key invalid or quota exceeded";
-    } else if (msg.includes("404")) {
+    } else if (msg. includes("404")) {
       msg = "Model not found (check model name or SDK)";
     }
 

@@ -20,7 +20,7 @@ const ChatInput = ({ onSend, loading }) => {
     <div className="input-area">
       <input
         type="text"
-        placeholder={loading ? "Avichi is thinking..." : "Ask me anything about Avichi College..."}
+        placeholder={loading ? "Avith is thinking..." : "Ask me anything about Avichi College..."}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
