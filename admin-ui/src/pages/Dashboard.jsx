@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SummaryCard from "../components/dashboard/SummaryCard";
 import RecentUpdates from "../components/dashboard/RecentUpdates";
+import { getDashboardStats } from "../services/dashboardService";
 import "../styles/dashboard.css";
 
 const Dashboard = () => {
@@ -14,17 +15,7 @@ const Dashboard = () => {
         setLoading(true);
         setError(null);
 
-        const res = await fetch("http://localhost:3000/api/admin/dashboard/stats", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to load dashboard data");
-        }
-
-        const data = await res.json();
+        const data = await getDashboardStats();
         setStats(data);
       } catch (err) {
         setError(err.message || "Failed to load dashboard data.");
