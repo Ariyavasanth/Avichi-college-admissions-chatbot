@@ -9,7 +9,9 @@ body {
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100vh; /* fallback */
+  height: 100dvh;
+  overflow: hidden;
 }
 
 /* HEADER */
@@ -219,4 +221,49 @@ body {
 .message-bubble p {
   margin: 2px 0;
   line-height: 1.6;
+}
+
+/* ── Mobile Responsiveness ────────────────────────────── */
+@media screen and (max-width: 480px) {
+  .chat-header {
+    padding: 12px 15px;
+  }
+  
+  .chat-header h2 {
+    font-size: 18px;
+  }
+
+  .chat-header p {
+    font-size: 12px;
+  }
+
+  .messages {
+    padding: 15px;
+  }
+
+  .input-area {
+    padding: 10px 12px;
+  }
+
+  .input-area input {
+    padding: 12px;
+    padding-right: 15px; /* removed unnecessary 80px padding */
+    font-size: 14px;
+  }
+
+  .input-area button {
+    margin-left: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .message-bubble {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .typing-bubble {
+    padding: 10px 14px;
+  }
 }
