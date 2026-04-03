@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/admin/dashboard";
+const API_URL = "https://avichi-college-admissions-chatbot.onrender.com/api/admin/dashboard";
 
 const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("adminToken")}`,

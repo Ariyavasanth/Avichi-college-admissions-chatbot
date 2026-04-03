@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/institution";
+const API_URL = "https://avichi-college-admissions-chatbot.onrender.com/api/institution";
 
 const getToken = () => localStorage.getItem("adminToken");
 

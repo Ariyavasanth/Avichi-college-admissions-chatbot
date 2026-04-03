@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/admin/auth";
+const API_URL = "https://avichi-college-admissions-chatbot.onrender.com/api/admin/auth";
 
 export const loginAdmin = async (email, password) => {
   const res = await fetch(`${API_URL}/login`, {
