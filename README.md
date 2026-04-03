@@ -1,5 +1,3 @@
-I have reformatted the entire 13-page project report into a standard Markdown format suitable for your `README.md`. This version removes the carousel tags and uses clear headers and horizontal rules to separate the sections.
-
 ### 📋 Full Project Report (Markdown Format)
 
 ````markdown
