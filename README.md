@@ -1,11 +1,5 @@
 
 ---
-
-## ✅ Clean Professional Version (Correct Format)
-
-Use this instead 👇
-
-:::writing{variant="standard" id="md001"}
 # 🎓 Avichi College Admission Chatbot: Project Report
 
 This report documents the design, implementation, and future scope of the AI-powered admission assistant for Avichi College of Arts and Science.
