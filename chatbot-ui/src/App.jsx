@@ -7,7 +7,7 @@ import { useChat } from "./hooks/useChat";
 import "./styles/chat.css";
 
 function App() {
-  const { messages, sendMessage, loading } = useChat();
+  const { messages, sendMessage, loading, resetChat } = useChat();
   const messagesEndRef = useRef(null);
 
   // Auto-scroll to bottom whenever messages or loading state changes
@@ -17,13 +17,15 @@ function App() {
 
   return (
     <div className="chat-container">
-      <ChatHeader />
-      <div className="messages" id="messages-list">
-        {messages.map((msg, index) => (
-          <MessageBubble key={index} message={msg} />
-        ))}
-        {loading && <TypingIndicator />}
-        <div ref={messagesEndRef} />
+      <ChatHeader onNewChat={resetChat} />
+      <div className="messages-viewport" id="messages-list">
+        <div className="messages-content">
+          {messages.map((msg, index) => (
+            <MessageBubble key={index} message={msg} />
+          ))}
+          {loading && <TypingIndicator />}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
       <ChatInput onSend={sendMessage} loading={loading} />
     </div>

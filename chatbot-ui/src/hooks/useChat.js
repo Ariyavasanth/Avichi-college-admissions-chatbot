@@ -45,5 +45,10 @@ export const useChat = () => {
     }
   };
 
-  return { messages, sendMessage, loading };
+  const resetChat = () => {
+    setMessages([WELCOME]);
+    setLoading(false);
+  };
+
+  return { messages, sendMessage, loading, resetChat };
 };
