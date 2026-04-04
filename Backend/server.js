@@ -38,15 +38,20 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ── CORS (Dynamic for Production) ────────────────────────────────────
-// ✅ FIX: Added .trim() to handle spaces after commas in env vars
-const allowedOrigins = process.env.CLIENT_URL
+// ── CORS (Dynamic for Production) ────────────────────────────────────
+const envOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",").map(url => url.trim())
-  : [
-    "https://ai-avichi-based-admission-chatbot.netlify.app",
-    "https://avith.netlify.app",  // ✅ Remove the trailing slash here
-    "http://localhost:5175",
-    "http://localhost:5173",
-  ];
+  : [];
+
+const hardcodedOrigins = [
+  "https://ai-avichi-based-admission-chatbot.netlify.app",
+  "https://avith.netlify.app",
+  "https://avichiadmin.vercel.app",
+  "http://localhost:5175",
+  "http://localhost:5173",
+];
+
+const allowedOrigins = [...new Set([...envOrigins, ...hardcodedOrigins])];
 
 app.use(
   cors({
