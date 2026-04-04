@@ -32,13 +32,13 @@ app.use(limiter);
 
 // ── CORS (Dynamic for Production) ────────────────────────────────────
 // Allow process.env.CLIENT_URL or default to localhosts if not set
-const allowedOrigins = process.env.CLIENT_URL 
-  ? process.env.CLIENT_URL.split(",") 
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(",")
   : [
-      "http://localhost:5173", // admin-ui (Vite)
-      "http://localhost:5174", // chatbot-ui (Vite)
-      "http://localhost:5175",
-    ];
+    "https://your-admin-ui.vercel.app", // admin-ui (Vite)
+    "https://your-chatbot-ui.vercel.app", // chatbot-ui (Vite)
+    "http://localhost:5175",
+  ];
 
 app.use(
   cors({
@@ -72,11 +72,11 @@ app.use("/api", chatRoutes); // POST /api/chat
 // ── Global Error Handler ───────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err.message);
-  
+
   // Hide stack traces in production!
   const isProduction = process.env.NODE_ENV === "production";
-  
-  res.status(err.status || 500).json({ 
+
+  res.status(err.status || 500).json({
     message: err.message || "Internal Server Error",
     stack: isProduction ? undefined : err.stack
   });
