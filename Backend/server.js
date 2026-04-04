@@ -42,11 +42,11 @@ app.use(limiter);
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",").map(url => url.trim())
   : [
-      "https://ai-avichi-based-admission-chatbot.netlify.app",
-      "https://your-chatbot-ui.vercel.app",
-      "http://localhost:5175",
-      "http://localhost:5173",
-    ];
+    "https://ai-avichi-based-admission-chatbot.netlify.app",
+    "https://avith.netlify.app/",
+    "http://localhost:5175",
+    "http://localhost:5173",
+  ];
 
 app.use(
   cors({
@@ -83,9 +83,9 @@ app.use((req, res, next) => {
 
 // ── Health Check ───────────────────────────────────────────────────────
 app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    status: "OK", 
-    uptime: process.uptime(), 
+  res.status(200).json({
+    status: "OK",
+    uptime: process.uptime(),
     env: process.env.NODE_ENV,
     timestamp: new Date().toISOString()
   });
