@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const sendChatMessage = async (message, history) => {
-  const res = await fetch(`${API_URL}/chat`, {
+  const res = await fetch(`${API_URL}/api/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -11,7 +11,7 @@ export const sendChatMessage = async (message, history) => {
 
   if (!res.ok) {
     throw new Error("Failed to fetch response");
-  } 
+  }
 
   return res.json();
 };
