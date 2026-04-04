@@ -27,7 +27,7 @@ function App() {
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <ChatInput onSend={sendMessage} loading={loading} />
+      <ChatInput onSend={sendMessage} loading={loading} messages={messages} />
     </div>
   );
 }

@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const ChatInput = ({ onSend, loading }) => {
+const SUGGESTIONS = [
+  "What courses are available?",
+  "Tell me about fees",
+  "Admission eligibility?",
+  "Scholarship details"
+];
+
+const ChatInput = ({ onSend, loading, messages }) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef(null);
 
@@ -27,6 +34,15 @@ const ChatInput = ({ onSend, loading }) => {
 
   return (
     <div className="input-area-wrapper">
+      {!loading && messages?.length < 2 && (
+        <div className="suggestions">
+          {SUGGESTIONS.map((s, i) => (
+            <button key={i} className="suggestion-chip" onClick={() => onSend(s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="input-area">
         <textarea
           ref={textareaRef}
