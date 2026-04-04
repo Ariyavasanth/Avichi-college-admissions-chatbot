@@ -270,11 +270,74 @@ body {
 
 /* ── MOBILE RESPONSIVENESS ──────────────────────────── */
 @media (max-width: 640px) {
-  .header-left h2 { font-size: 1rem; }
-  .new-chat-btn { padding: 4px 10px; font-size: 0.75rem; }
-  .messages-viewport { padding: 10px 0; }
-  .message-bubble { max-width: 90%; }
-  .input-area-wrapper { padding: 10px; }
-  .input-area { border-radius: 12px; }
-  .avatar { display: none; } /* Hide avatars on mobile for more space */
+  .chat-header {
+    padding: 8px 15px; /* Thinner header */
+  }
+
+  .header-left h2 {
+    font-size: 0.95rem;
+  }
+
+  .header-left p {
+    display: none; /* Hide subtitle to save vertical space */
+  }
+
+  .beta {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
+
+  .new-chat-btn {
+    padding: 6px 10px;
+  }
+
+  .new-chat-btn .btn-text {
+    display: none; /* Only show '+' on mobile */
+  }
+
+  .new-chat-btn .btn-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .status-text {
+    display: none; /* Only show the dot on mobile */
+  }
+
+  .status {
+    padding: 4px;
+    border: none;
+    background: transparent;
+  }
+
+  .messages-viewport {
+    padding: 5px 0;
+  }
+
+  .message-content {
+    padding: 0 12px;
+  }
+
+  .message-bubble {
+    max-width: 92%;
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+
+  .input-area-wrapper {
+    padding: 10px 12px;
+  }
+
+  .input-area {
+    border-radius: 12px;
+    padding: 8px 12px;
+  }
+
+  .input-area textarea {
+    font-size: 0.95rem;
+  }
+
+  .avatar {
+    display: none; /* Hide avatars for more space on small screens */
+  }
 }

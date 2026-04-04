@@ -9,10 +9,11 @@ const ChatHeader = ({ onNewChat }) => {
       </div>
       <div className="header-right">
         <button className="new-chat-btn" onClick={onNewChat} title="New Chat">
-          + New Chat
+          <span className="btn-icon">+</span>
+          <span className="btn-text">New Chat</span>
         </button>
         <div className="status">
-          <span className="dot"></span> Online
+          <span className="dot"></span> <span className="status-text">Online</span>
         </div>
       </div>
     </div>
