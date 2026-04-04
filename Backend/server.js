@@ -43,7 +43,7 @@ const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",").map(url => url.trim())
   : [
     "https://ai-avichi-based-admission-chatbot.netlify.app",
-    "https://avith.netlify.app/",
+    "https://avith.netlify.app",  // ✅ Remove the trailing slash here
     "http://localhost:5175",
     "http://localhost:5173",
   ];
