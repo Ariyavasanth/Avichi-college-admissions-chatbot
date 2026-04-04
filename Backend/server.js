@@ -22,37 +22,35 @@ const app = express();
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginEmbedderPolicy: false, // Required for some frontend features
-    crossOriginOpenerPolicy: false,   // Required for some frontend features
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
   })
 );
 
 // Apply Rate Limiting to prevent brute force / DDoS
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  max: 100, // Limit each IP to 100 requests per `window`
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { message: "Too many requests from this IP, please try again after 15 minutes" },
 });
 app.use(limiter);
 
 // ── CORS (Dynamic for Production) ────────────────────────────────────
-// Allow process.env.CLIENT_URL or default to localhosts if not set
 // ✅ FIX: Added .trim() to handle spaces after commas in env vars
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",").map(url => url.trim())
   : [
-    "https://ai-avichi-based-admission-chatbot.netlify.app", // admin-ui (Vite)
-    "https://your-chatbot-ui.vercel.app", // chatbot-ui (Vite)
-    "http://localhost:5175",
-    "http://localhost:5173", // Vite default dev port
-  ];
+      "https://ai-avichi-based-admission-chatbot.netlify.app",
+      "https://your-chatbot-ui.vercel.app",
+      "http://localhost:5175",
+      "http://localhost:5173",
+    ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // ✅ Allow requests with no origin (like mobile apps, curl, Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -60,21 +58,20 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // Allow cookies/auth headers
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 
-// ✅ FIX: Explicitly handle preflight OPTIONS requests
-app.options("*", cors());
+// ✅ REMOVED: app.options("*", cors()); ← This was causing the path-to-regexp error!
+// The cors() middleware above already handles preflight requests automatically.
 
 // ── Body Parsers ───────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── 🔍 Debug Middleware (Optional - Remove in Production) ─────────────
-// Uncomment below to log CORS-related requests during testing
 /*
 app.use((req, res, next) => {
   if (req.method === "OPTIONS" || req.path.includes("/auth")) {
@@ -86,9 +83,9 @@ app.use((req, res, next) => {
 
 // ── Health Check ───────────────────────────────────────────────────────
 app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    uptime: process.uptime(),
+  res.status(200).json({ 
+    status: "OK", 
+    uptime: process.uptime(), 
     env: process.env.NODE_ENV,
     timestamp: new Date().toISOString()
   });
@@ -99,9 +96,9 @@ app.use("/api/admin/auth", authRoutes);
 app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/admin/courses", courseRoutes);
 app.use("/api/institution", institutionRoutes);
-app.use("/api", chatRoutes); // POST /api/chat
+app.use("/api", chatRoutes);
 
-// ── 404 Handler (Catch undefined routes) ───────────────────────────────
+// ── 404 Handler ───────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ message: `Route ${req.method} ${req.originalUrl} not found` });
 });
@@ -109,10 +106,7 @@ app.use((req, res) => {
 // ── Global Error Handler ───────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error("🔥 GLOBAL ERROR:", err.message);
-
-  // Hide stack traces in production!
   const isProduction = process.env.NODE_ENV === "production";
-
   res.status(err.status || 500).json({
     message: err.message || "Internal Server Error",
     error: isProduction ? undefined : err.name,
@@ -126,7 +120,6 @@ connectDB()
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`✅ Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
-      console.log(`🌍 Listening on: http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
