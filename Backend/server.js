@@ -35,7 +35,7 @@ app.use(limiter);
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",")
   : [
-    "https://your-admin-ui.vercel.app", // admin-ui (Vite)
+    "https://ai-avichi-based-admission-chatbot.netlify.app", // admin-ui (Vite)
     "https://your-chatbot-ui.vercel.app", // chatbot-ui (Vite)
     "http://localhost:5175",
   ];
