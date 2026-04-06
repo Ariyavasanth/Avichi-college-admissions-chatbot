@@ -3,7 +3,7 @@
   background: #fff;
   padding: 30px;
   border-radius: 12px;
-  margin: 30px;
+  margin: 20px 30px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
 }
 
@@ -163,7 +163,8 @@
   }
 
   .institution-container {
-    margin: 16px;
+    margin: 0;
     padding: 20px;
+    border-radius: 0;
   }
 }

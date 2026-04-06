@@ -1,25 +1,14 @@
-import { useState } from "react";
-import { Home, BookOpen, Building2, GraduationCap, Menu, X } from "lucide-react";
+import { Home, BookOpen, Building2, GraduationCap } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import "../../styles/dashboard.css";
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleSidebar = () => setIsOpen(!isOpen);
-  const closeSidebar = () => setIsOpen(false);
-
+const Sidebar = ({ isOpen, onClose }) => {
   return (
     <>
-      {/* Mobile Hamburger Toggle - Visible only on mobile via CSS */}
-      <button className="menu-toggle" onClick={toggleSidebar}>
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
       {/* Sidebar Overlay - Closes sidebar on click */}
       <div 
         className={`sidebar-overlay ${isOpen ? "open" : ""}`} 
-        onClick={closeSidebar}
+        onClick={onClose}
       />
 
       {/* Sidebar Navigation */}
@@ -37,7 +26,7 @@ const Sidebar = () => {
               <NavLink
                 to="/"
                 className={({ isActive }) => (isActive ? "active" : "")}
-                onClick={closeSidebar}
+                onClick={onClose}
               >
                 <Home size={17} /> Dashboard
               </NavLink>
@@ -47,7 +36,7 @@ const Sidebar = () => {
               <NavLink
                 to="/courses"
                 className={({ isActive }) => (isActive ? "active" : "")}
-                onClick={closeSidebar}
+                onClick={onClose}
               >
                 <BookOpen size={17} /> Course Management
               </NavLink>
@@ -57,7 +46,7 @@ const Sidebar = () => {
               <NavLink
                 to="/institution"
                 className={({ isActive }) => (isActive ? "active" : "")}
-                onClick={closeSidebar}
+                onClick={onClose}
               >
                 <Building2 size={17} /> Institution Details
               </NavLink>

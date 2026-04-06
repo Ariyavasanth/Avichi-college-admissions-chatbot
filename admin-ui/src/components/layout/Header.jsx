@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 
-const Header = () => {
+const Header = ({ onSidebarToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,9 +22,14 @@ const Header = () => {
 
   return (
     <div className="header">
-      {/* Left side: Dynamic Page Title */}
-      <div style={{ fontSize: "15px", fontWeight: 600, color: "#0f172a" }}>
-        {getPageTitle(location.pathname)}
+      {/* Left side: Mobile Toggle + Dynamic Page Title */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <button className="mobile-menu-btn" onClick={onSidebarToggle}>
+          <Menu size={20} />
+        </button>
+        <div className="header-title">
+          {getPageTitle(location.pathname)}
+        </div>
       </div>
 
       {/* Right side: Admin Badge and Logout */}
