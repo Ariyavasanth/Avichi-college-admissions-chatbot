@@ -15,17 +15,11 @@ class RAGService {
    */
   async answerQuery(userQuery, history = []) {
     try {
-      // 0️⃣ Fast-path: Handle greetings/casual messages without vector search
+      // 0️⃣ Fast-path: Handle greetings — return a clean hardcoded welcome
+      //    (Avoids AI hallucinating course details from its training data)
       const greetingPatterns = /^\s*(hi|hello|hey|greetings|good morning|good afternoon|good evening|howdy|sup|what'?s up|namaste)\s*[!?.]*\s*$/i;
       if (greetingPatterns.test(userQuery)) {
-        const reply = await callAI({
-          prompt: userQuery,
-          systemMessage: `You are Avichi AI, a friendly and professional admission assistant for Avichi College. 
-Greet the user warmly, introduce yourself briefly, and ask how you can help them with admissions today.`,
-          history,
-          temperature: 0.4,
-        });
-        return reply;
+        return "👋 Hello! Welcome to **Avichi College Admission Assistant**.\n\nI'm here to help you with accurate information about our courses, fees, eligibility, and more.\n\nHow can I assist you today? 😊";
       }
 
       // 1️⃣ Generate Embedding for User Query
