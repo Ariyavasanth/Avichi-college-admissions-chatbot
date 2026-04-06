@@ -7,7 +7,7 @@ const SUGGESTIONS = [
   "Scholarship details"
 ];
 
-const ChatInput = ({ onSend, loading, messages }) => {
+const ChatInput = ({ onSend, onStop, loading, messages }) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef(null);
 
@@ -55,25 +55,42 @@ const ChatInput = ({ onSend, loading, messages }) => {
           autoFocus
           autoComplete="off"
         />
-        <button
-          onClick={handleSend}
-          disabled={loading || !input.trim()}
-          className="send-btn"
-          aria-label="Send message"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        {loading ? (
+          <button
+            onClick={onStop}
+            className="stop-btn"
+            aria-label="Stop generating"
           >
-            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
-          </svg>
-        </button>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <rect x="6" y="6" width="12" height="12" rx="2" />
+            </svg>
+          </button>
+        ) : (
+          <button
+            onClick={handleSend}
+            disabled={!input.trim()}
+            className="send-btn"
+            aria-label="Send message"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>
+            </svg>
+          </button>
+        )}
       </div>
       <p className="input-footer">AI can make mistakes. Check important info.</p>
     </div>
