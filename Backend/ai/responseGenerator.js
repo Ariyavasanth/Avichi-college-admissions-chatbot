@@ -81,7 +81,7 @@ Be smart, natural, and context-aware like ChatGPT.
       prompt: userMessage,
       systemMessage,
       history, // 🔥 THIS ENABLES CONTEXT MEMORY
-      temperature: 0.3,
+      temperature: 1,
       max_tokens: 400,
     });
 
