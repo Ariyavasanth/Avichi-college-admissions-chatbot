@@ -11,7 +11,7 @@ export const useChat = () => {
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef(null);
 
-  const sendMessage = async (text) => {
+  const sendMessage = async (text, options = {}) => {
     const trimmed = text?.trim();
     if (!trimmed) return;
 
@@ -35,10 +35,21 @@ export const useChat = () => {
       // e. Call API with history and AbortSignal
       const data = await sendChatMessage(trimmed, history, controller.signal);
 
+      const replyText = data.reply || "Sorry, I couldn't understand that.";
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: data.reply || "Sorry, I couldn't understand that." },
+        { sender: "bot", text: replyText },
       ]);
+
+      // Voice Output
+      if (options.isVoice && window.speechSynthesis) {
+        window.speechSynthesis.cancel(); // Stop any previous speech
+        const utterance = new SpeechSynthesisUtterance(replyText);
+        utterance.lang = "en-IN"; // Match the recognition language
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
     } catch (error) {
       if (error.name === "AbortError") {
         console.log("Chat generation stopped by user.");
@@ -60,6 +71,9 @@ export const useChat = () => {
       abortControllerRef.current.abort();
       setLoading(false);
       abortControllerRef.current = null;
+    }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
     }
   };
 
