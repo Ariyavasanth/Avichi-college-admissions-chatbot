@@ -9,9 +9,10 @@ function App() {
   useEffect(() => {
     const fetchUI = async () => {
       try {
+        const apiUrl = import.meta.env.VITE_API_URL;
         const [setRes, sugRes] = await Promise.all([
-          fetch("http://localhost:3000/api/chatbot/settings"),
-          fetch("http://localhost:3000/api/chatbot/suggestions")
+          fetch(`${apiUrl}/api/chatbot/settings`),
+          fetch(`${apiUrl}/api/chatbot/suggestions`)
         ]);
         setSettings(await setRes.json());
         setSuggestions(await sugRes.json());
