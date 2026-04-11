@@ -390,19 +390,44 @@
   overflow: hidden;
 }
 
-@media (max-width: 1200px) {
-  .chatbot-preview-wrapper.desktop {
-    width: 450px;
-  }
-}
-
 @media (max-width: 1024px) {
   .chatbot-control-container {
     flex-direction: column;
+    gap: 20px;
   }
   .chatbot-preview-wrapper.desktop {
     width: 100%;
     position: relative;
     top: 0;
+    padding: 16px;
+  }
+  .desktop-preview-frame {
+    height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-grid, .theme-grid {
+    grid-template-columns: 1fr;
+  }
+  .desktop-preview-frame {
+    height: 450px;
+  }
+  .browser-address {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .desktop-preview-frame {
+    height: 400px;
+    transform: scale(0.95);
+    transform-origin: top center;
+  }
+  .chatbot-forms-wrapper {
+    min-height: auto;
+  }
+  .chatbot-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 }

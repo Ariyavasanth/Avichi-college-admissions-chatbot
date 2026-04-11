@@ -1,11 +1,18 @@
-import { Home, BookOpen, Building2, GraduationCap, Settings } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Home, BookOpen, Building2, GraduationCap, Settings, LogOut } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAdmin } from "../../context/AdminContext";
 import "../../styles/dashboard.css";
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { adminData } = useAdmin();
+  const { adminData, logout } = useAdmin();
+  const navigate = useNavigate();
   const siteName = adminData?.systemSettings?.siteName || "Avichi Admin";
+
+  const handleLogout = () => {
+    logout();
+    onClose();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <>
@@ -71,18 +78,15 @@ const Sidebar = ({ isOpen, onClose }) => {
                 to="/settings"
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={onClose}
-                style={({ isActive }) => ({
-                  display: "flex", 
-                  alignItems: "center", 
-                  gap: "10px", 
-                  padding: "12px 16px", 
-                  color: isActive ? "#3b82f6" : "rgba(255, 255, 255, 0.7)", 
-                  textDecoration: "none", 
-                  transition: "all 0.2s" 
-                })}
               >
                 <Settings size={17} /> Settings
               </NavLink>
+            </li>
+
+            <li className="mobile-logout">
+              <button onClick={handleLogout} className="sidebar-logout-btn">
+                <LogOut size={17} /> Logout
+              </button>
             </li>
           </ul>
         </nav>
