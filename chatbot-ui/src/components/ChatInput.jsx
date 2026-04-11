@@ -1,13 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const SUGGESTIONS = [
-  "What courses are available?",
-  "Tell me about fees",
-  "Admission eligibility?",
-  "Scholarship details"
-];
 
-const ChatInput = ({ onSend, onStop, loading, messages }) => {
+
+const ChatInput = ({ onSend, onStop, loading, messages, suggestionsList, isPreviewMode }) => {
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [isVoiceInput, setIsVoiceInput] = useState(false);
@@ -21,14 +16,13 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
-        recognitionRef.current.lang = "en-IN"; // Set to Indian English for better accuracy
+        recognitionRef.current.lang = "en-IN";
 
         recognitionRef.current.onresult = (event) => {
           let transcript = "";
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             transcript += event.results[i][0].transcript;
           }
-          // We only update if there's actual content to prevent clearing input on every result
           if (transcript) {
             setInput(transcript);
             setIsVoiceInput(true);
@@ -62,7 +56,6 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
       }
     }
     
-    // Cleanup on unmount
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
@@ -92,7 +85,6 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
     }
   };
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -101,7 +93,7 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
   }, [input]);
 
   const handleSend = () => {
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || isPreviewMode) return;
     onSend(input, { isVoice: isVoiceInput });
     setInput("");
     setIsVoiceInput(false);
@@ -123,10 +115,16 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
 
   return (
     <div className="input-area-wrapper">
-      {!loading && messages?.length < 2 && (
+      {!loading && messages?.length < 2 && suggestionsList?.length > 0 && (
         <div className="suggestions">
-          {SUGGESTIONS.map((s, i) => (
-            <button key={i} className="suggestion-chip" onClick={() => onSend(s)}>
+          {suggestionsList.map((s, i) => (
+            <button 
+              key={i} 
+              className="suggestion-chip" 
+              onClick={() => { if (!isPreviewMode) onSend(s); }}
+              disabled={isPreviewMode}
+              style={isPreviewMode ? { opacity: 0.7, cursor: "not-allowed" } : {}}
+            >
               {s}
             </button>
           ))}
@@ -136,18 +134,18 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
         <textarea
           ref={textareaRef}
           rows="1"
-          placeholder={loading ? "Avith is thinking..." : "Message Avith..."}
+          placeholder={isPreviewMode ? "Input disabled in preview mode" : (loading ? "Avith is thinking..." : "Message Avith...")}
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
             setIsVoiceInput(false);
           }}
-          onKeyDown={handleKeyDown}
-          disabled={loading}
-          autoFocus
+          disabled={loading || isPreviewMode}
+          autoFocus={!isPreviewMode}
           autoComplete="off"
+          style={isPreviewMode ? { cursor: "not-allowed" } : {}}
         />
-        {loading ? (
+        {loading && !isPreviewMode ? (
           <button
             onClick={onStop}
             className="stop-btn"
@@ -169,6 +167,8 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
               className={`mic-btn ${isListening ? 'listening' : ''}`}
               aria-label="Toggle voice input"
               title={isListening ? "Stop listening" : "Start voice input"}
+              disabled={isPreviewMode}
+              style={isPreviewMode ? { opacity: 0.5, cursor: "not-allowed" } : {}}
             >
               {isListening ? (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: '#C62828'}}>
@@ -187,9 +187,10 @@ const ChatInput = ({ onSend, onStop, loading, messages }) => {
             </button>
             <button
               onClick={handleSend}
-              disabled={!input.trim() && !isListening}
+              disabled={isPreviewMode || (!input.trim() && !isListening)}
               className="send-btn"
               aria-label="Send message"
+              style={isPreviewMode ? { opacity: 0.5, cursor: "not-allowed" } : {}}
             >
               <svg
                 width="24"

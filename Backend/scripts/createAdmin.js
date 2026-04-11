@@ -9,24 +9,25 @@ connectDB()
 
 
 async function createAdmin() {
-  const existingAdmin = await Admin.findOne({
-    email: "admin@college.com",
-  });
+  const adminCount = await Admin.countDocuments();
 
-  if (existingAdmin) {
-    console.log("Admin already exists");
+  if (adminCount > 0) {
+    console.log("Admin account(s) already exist. Skipping seed.");
     process.exit(0);
   }
 
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  const initialEmail = process.env.ADMIN_EMAIL || "superadmin@avichicollege.edu";
+  const initialPassword = process.env.ADMIN_PASSWORD || "AvichiAdmin@2026!";
 
+  // Pre('save') hook in Admin schema hashes the password, so we just pass plain text here
   await Admin.create({
-    name: "Super Admin",
-    email: "admin@college.com",
-    password: hashedPassword,
+    name: "System Admin",
+    email: initialEmail,
+    password: initialPassword,
+    role: "superadmin"
   });
 
-  console.log("Admin created successfully");
+  console.log(`Admin created successfully with email: ${initialEmail}`);
   process.exit();
 }
 

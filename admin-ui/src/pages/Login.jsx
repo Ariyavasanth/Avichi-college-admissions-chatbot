@@ -65,7 +65,7 @@ const Login = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@college.com"
+              placeholder="admin@avichicollege.edu"
               autoComplete="email"
               disabled={loading}
               required

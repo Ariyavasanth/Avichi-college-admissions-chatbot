@@ -10,6 +10,8 @@ dotenv.config();
 const connectDB = require("./config/Db");
 
 const authRoutes = require("./routes/authRoutes");
+const settingsRoutes = require("./routes/settingsRoutes");
+const chatbotSettingsRoutes = require("./routes/chatbotSettingsRoutes");
 const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const chatRoutes = require("./routes/chatRoutes");
@@ -49,6 +51,8 @@ const hardcodedOrigins = [
   "https://avichiadmin.vercel.app",
   "http://localhost:5175",
   "http://localhost:5173",
+  "http://localhost:5174",
+
 ];
 
 const allowedOrigins = [...new Set([...envOrigins, ...hardcodedOrigins])];
@@ -98,9 +102,11 @@ app.get("/health", (req, res) => {
 
 // ── Routes ─────────────────────────────────────────────────────────────
 app.use("/api/admin/auth", authRoutes);
+app.use("/api/admin/settings", settingsRoutes);
 app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/admin/courses", courseRoutes);
 app.use("/api/institution", institutionRoutes);
+app.use("/api/chatbot", chatbotSettingsRoutes);
 app.use("/api", chatRoutes);
 
 // ── 404 Handler ───────────────────────────────────────────────────────

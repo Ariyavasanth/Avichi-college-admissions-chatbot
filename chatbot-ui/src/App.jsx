@@ -1,33 +1,36 @@
-import React, { useRef, useEffect } from "react";
-import ChatHeader from "./components/ChatHeader";
-import MessageBubble from "./components/MessageBubble";
-import ChatInput from "./components/ChatInput";
-import TypingIndicator from "./components/TypingIndicator";
-import { useChat } from "./hooks/useChat";
+import React, { useState, useEffect } from "react";
+import ChatbotUI from "./components/chatbot/ChatbotUI";
 import "./styles/chat.css";
 
 function App() {
-  const { messages, sendMessage, loading, resetChat, stopChat } = useChat();
-  const messagesEndRef = useRef(null);
+  const [settings, setSettings] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
 
-  // Auto-scroll to bottom whenever messages or loading state changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+    const fetchUI = async () => {
+      try {
+        const [setRes, sugRes] = await Promise.all([
+          fetch("http://localhost:3000/api/chatbot/settings"),
+          fetch("http://localhost:3000/api/chatbot/suggestions")
+        ]);
+        setSettings(await setRes.json());
+        setSuggestions(await sugRes.json());
+      } catch (err) {
+        console.error("Failed to fetch UI settings", err);
+      }
+    };
+    fetchUI();
+  }, []);
+
+  if (!settings) return null;
 
   return (
-    <div className="chat-container">
-      <ChatHeader onNewChat={resetChat} />
-      <div className="messages-viewport" id="messages-list">
-        <div className="messages-content">
-          {messages.map((msg, index) => (
-            <MessageBubble key={index} message={msg} />
-          ))}
-          {loading && <TypingIndicator />}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-      <ChatInput onSend={sendMessage} onStop={stopChat} loading={loading} messages={messages} />
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <ChatbotUI 
+        settings={settings} 
+        suggestions={suggestions.map(s => s.text)} 
+        isPreviewMode={false} 
+      />
     </div>
   );
 }

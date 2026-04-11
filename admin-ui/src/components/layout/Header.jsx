@@ -1,24 +1,27 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut, Menu } from "lucide-react";
+import { useAdmin } from "../../context/AdminContext";
 
 const Header = ({ onSidebarToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { adminData, logout } = useAdmin();
 
   // Function to map current path to professional page titles
   const getPageTitle = (path) => {
     if (path === "/") return "Dashboard";
     if (path === "/courses") return "Course Management";
     if (path === "/institution") return "Institution Details";
+    if (path === "/settings") return "Settings";
     return "Admin Panel";
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     navigate("/login", { replace: true });
   };
 
-  const adminName = localStorage.getItem("adminName") || "Admin";
+  const adminName = adminData?.name || "Admin";
 
   return (
     <div className="header">
@@ -47,7 +50,7 @@ const Header = ({ onSidebarToggle }) => {
             alignItems: "center",
             justifyContent: "center"
           }}>
-            A
+            {adminName.charAt(0).toUpperCase()}
           </div>
           <span style={{ fontSize: "13px", fontWeight: 500, color: "#0f172a" }}>
             {adminName}

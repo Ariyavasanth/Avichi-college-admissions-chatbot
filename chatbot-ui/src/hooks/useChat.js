@@ -6,8 +6,15 @@ const WELCOME = {
   text: "Hi! I'm the Avichi College Admission Assistant. Ask me about courses, fees, eligibility, or duration! 🎓",
 };
 
-export const useChat = () => {
-  const [messages, setMessages] = useState([WELCOME]);
+export const useChat = (dynamicWelcome) => {
+  const [messages, setMessages] = useState([]);
+
+  // Setup initial message when dynamicWelcome arrives
+  useEffect(() => {
+    if (dynamicWelcome) {
+      setMessages([{ sender: "bot", text: dynamicWelcome }]);
+    }
+  }, [dynamicWelcome]);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef(null);
 
@@ -78,7 +85,7 @@ export const useChat = () => {
   };
 
   const resetChat = () => {
-    setMessages([WELCOME]);
+    setMessages(dynamicWelcome ? [{ sender: "bot", text: dynamicWelcome }] : []);
     setLoading(false);
   };
 
