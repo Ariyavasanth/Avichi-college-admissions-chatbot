@@ -119,7 +119,7 @@ const Login = () => {
         </form>
 
         <p className="login-footer">
-          © {new Date().getFullYear()} Avichi College — Admin Panel
+          © 2025 Avichi College — Admin Panel
         </p>
       </div>
     </div>
