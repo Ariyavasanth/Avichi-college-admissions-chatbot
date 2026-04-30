@@ -19,6 +19,10 @@ const institutionRoutes = require("./routes/institutionRoutes");
 
 const app = express();
 
+// Trust proxy for Render/Load Balancers
+app.set("trust proxy", 1);
+
+
 // ── Security Middleware (Production Ready) ─────────────────────────
 // Configure helmet to allow CORS preflight requests
 app.use(
@@ -40,9 +44,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ── CORS (Dynamic for Production) ────────────────────────────────────
-// ── CORS (Dynamic for Production) ────────────────────────────────────
 const envOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(",").map(url => url.trim())
+  ? process.env.CLIENT_URL.split(",").map(url => url.trim().replace(/\/$/, ""))
   : [];
 
 const hardcodedOrigins = [
@@ -52,7 +55,6 @@ const hardcodedOrigins = [
   "http://localhost:5175",
   "http://localhost:5173",
   "http://localhost:5174",
-
 ];
 
 const allowedOrigins = [...new Set([...envOrigins, ...hardcodedOrigins])];
@@ -60,18 +62,27 @@ const allowedOrigins = [...new Set([...envOrigins, ...hardcodedOrigins])];
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      
+      // Normalize origin for comparison (remove trailing slash)
+      const normalizedOrigin = origin.replace(/\/$/, "");
+      
+      if (allowedOrigins.includes(normalizedOrigin)) {
         callback(null, true);
       } else {
         console.warn(`❌ CORS blocked origin: ${origin}`);
-        callback(new Error("Not allowed by CORS"));
+        callback(null, false); // Don't throw, just block
       }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   })
 );
+
 
 // ✅ REMOVED: app.options("*", cors()); ← This was causing the path-to-regexp error!
 // The cors() middleware above already handles preflight requests automatically.
