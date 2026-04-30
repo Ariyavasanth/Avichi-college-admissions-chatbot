@@ -45,25 +45,32 @@ exports.requestEmailChange = async (req, res) => {
 
     // Send verification email
     try {
-      console.log(`📧 [MAILER] Attempting to send verification to: ${newEmail}`);
-      const mailResult = await sendEmailChangeVerification(newEmail, token);
-      if (mailResult && mailResult.loggedToConsole) {
-        console.log("⚠️ [MAILER] Email configuration is missing. Link logged to console.");
-      } else {
+        console.log(`📧 [MAILER] Attempting to send verification to: ${newEmail}`);
+        const mailResult = await sendEmailChangeVerification(newEmail, token);
+        
+        if (mailResult && mailResult.loggedToConsole) {
+            return res.json({ 
+                success: true, 
+                message: "Email config is missing on server. The verification link has been logged to the server console.",
+                warning: "EMAIL_NOT_SENT_PRODUCTION"
+            });
+        }
+        
         console.log("✅ [MAILER] Verification email successfully sent");
-      }
+        res.json({ 
+            success: true, 
+            message: "Verification link has been sent to your new email address. Please confirm it within 15 minutes." 
+        });
+
     } catch (mailError) {
-      console.error("❌ [MAILER] Failed to send verification email:", mailError.message);
-      // In production, we still return success but maybe with a note if it's a known issue
-      // However, usually we want to know if it failed.
+        console.error("❌ [MAILER] Failed to send verification email:", mailError);
+        return res.status(500).json({ 
+            success: false,
+            message: "Failed to send verification email. Please check server configuration.", 
+            error: mailError.message 
+        });
     }
 
-
-
-    res.json({ 
-      success: true, 
-      message: "Verification link has been sent to your new email address. Please confirm it within 15 minutes." 
-    });
   } catch (error) {
     console.error("Request Email Change Error:", error);
     res.status(500).json({ message: "Server Error" });

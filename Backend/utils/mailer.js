@@ -15,16 +15,30 @@ const createTransporter = () => {
         return null;
     }
 
-    return nodemailer.createTransport({
+    const config = {
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT || 587,
-        secure: process.env.EMAIL_PORT == 465, // true for 465, false for others
+        secure: process.env.EMAIL_PORT == 465, 
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
         },
-    });
+        tls: {
+            rejectUnauthorized: false
+        }
+    };
+
+    // Use service shortcut for Gmail
+    if (process.env.EMAIL_HOST?.includes("gmail.com")) {
+        delete config.host;
+        delete config.port;
+        delete config.secure;
+        config.service = "gmail";
+    }
+
+    return nodemailer.createTransport(config);
 };
+
 
 /**
  * Sends a verification email for email change.
