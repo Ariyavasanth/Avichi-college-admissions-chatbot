@@ -36,11 +36,23 @@ exports.requestEmailChange = async (req, res) => {
 
     // Send verification email
     try {
-      await sendEmailChangeVerification(newEmail, token);
+      const mailResult = await sendEmailChangeVerification(newEmail, token);
+      if (mailResult && mailResult.loggedToConsole) {
+        console.log("⚠️ [MAILER] Email configuration is missing. Link logged above.");
+      } else {
+        console.log("✅ [MAILER] Verification email sent to:", newEmail);
+      }
     } catch (mailError) {
-      console.error("Mail Error:", mailError);
-      // We don't fail the request here, but ideally we should inform the admin or retry
+      console.error("❌ [MAILER] Failed to send verification email:", mailError.message);
+      // In development, we might want to know it failed
+      if (process.env.NODE_ENV !== "production") {
+         return res.status(500).json({ 
+           message: "Email could not be sent. Check server logs.", 
+           error: mailError.message 
+         });
+      }
     }
+
 
     res.json({ 
       success: true, 
@@ -200,10 +212,22 @@ exports.initialSetup = async (req, res) => {
     await admin.save();
 
     try {
-      await sendEmailChangeVerification(newEmail, token);
+      const mailResult = await sendEmailChangeVerification(newEmail, token);
+      if (mailResult && mailResult.loggedToConsole) {
+        console.log("⚠️ [MAILER] Email configuration is missing. Link logged above.");
+      } else {
+        console.log("✅ [MAILER] Verification email sent to:", newEmail);
+      }
     } catch (mailError) {
-      console.error("Mail Error:", mailError);
+      console.error("❌ [MAILER] Failed to send verification email:", mailError.message);
+      if (process.env.NODE_ENV !== "production") {
+         return res.status(500).json({ 
+           message: "Email could not be sent. Check server logs.", 
+           error: mailError.message 
+         });
+      }
     }
+
 
     res.json({
       success: true,
