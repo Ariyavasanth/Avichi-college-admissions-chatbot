@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginAdmin } from "../services/authService";
+import { useAdmin } from "../context/AdminContext";
 import "../styles/login.css";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { updateAdmin } = useAdmin();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,15 @@ const Login = () => {
       // Persist token + admin info
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem("admin", JSON.stringify(data.admin));
-      navigate("/", { replace: true });
+      
+      // Update global context
+      updateAdmin(data.admin);
+      
+      if (data.admin.isFirstLogin) {
+        navigate("/admin/change-password", { replace: true });
+      } else {
+        navigate("/admin/dashboard", { replace: true });
+      }
     } catch (err) {
       setError(err.message || "Invalid credentials. Please try again.");
     } finally {

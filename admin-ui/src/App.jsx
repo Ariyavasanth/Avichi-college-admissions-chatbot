@@ -8,6 +8,8 @@ import InstitutionDetails from "./pages/InstitutionDetails";
 import SettingsLayout from "./pages/Settings/SettingsLayout";
 import ChatbotControl from "./pages/ChatbotControl/ChatbotControl";
 import Login from "./pages/Login";
+import InitialSetup from "./pages/InitialSetup";
+import ConfirmEmailChange from "./pages/ConfirmEmailChange";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -16,12 +18,21 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
-          {/* Public */}
-          <Route path="/login" element={<Login />} />
+          {/* Public / Auth */}
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/confirm-email-change" element={<ConfirmEmailChange />} />
+          <Route 
+            path="/admin/setup" 
+            element={
+              <ProtectedRoute checkFirstLogin={false}>
+                <InitialSetup />
+              </ProtectedRoute>
+            } 
+          />
 
           {/* Protected admin routes */}
           <Route
-            path="/"
+            path="/admin/dashboard"
             element={
               <ProtectedRoute>
                 <AdminLayout />
@@ -35,8 +46,12 @@ function App() {
             <Route path="settings/*" element={<SettingsLayout />} />
           </Route>
 
+          {/* Redirects */}
+          <Route path="/" element={<Navigate to="/admin/login" replace />} />
+          <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
     </AdminProvider>

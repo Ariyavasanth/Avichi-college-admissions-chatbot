@@ -10,7 +10,7 @@ exports.authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     if (decoded.role !== "admin" && decoded.role !== "superadmin") {
-      return res.status(403).json({ message: "Forbidden: Admins only" });
+      return res.status(403).json({ message: "Forbidden: Admin access only" });
     }
     req.admin = decoded; // Token contains { id, role }
     next();

@@ -1,5 +1,6 @@
 const ChatbotSettings = require("../model/ChatbotSettings");
 const Suggestion = require("../model/Suggestions");
+const Admin = require("../model/Admins");
 
 // ======================= CHATBOT UI SETTINGS =======================
 
@@ -9,10 +10,17 @@ exports.getSettings = async (req, res) => {
   try {
     let settings = await ChatbotSettings.findOne();
     if (!settings) {
-      // Create defaults if none exist
       settings = await ChatbotSettings.create({});
     }
-    res.json(settings);
+
+    // Get maintenance mode from system admin
+    const admin = await Admin.findOne(); // Single admin system
+    const isMaintenanceMode = admin?.systemSettings?.isMaintenanceMode || false;
+
+    res.json({
+      ...settings.toObject(),
+      isMaintenanceMode
+    });
   } catch (error) {
     console.error("Get Settings Error:", error);
     res.status(500).json({ message: "Server Error" });

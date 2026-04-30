@@ -14,13 +14,6 @@ export const AdminProvider = ({ children }) => {
         if (storedAdmin && getToken()) {
           const parsed = JSON.parse(storedAdmin);
           setAdminData(parsed);
-          
-          // Apply theme 
-          if (parsed?.systemSettings?.theme === "dark") {
-            document.body.classList.add("dark-theme");
-          } else {
-            document.body.classList.remove("dark-theme");
-          }
         }
       } catch (e) {
         console.error("Failed to parse admin data", e);
@@ -32,16 +25,9 @@ export const AdminProvider = ({ children }) => {
   }, []);
 
   const updateAdmin = (newData) => {
-    // Merge new data with existing, handle nested states if needed
     const updated = { ...adminData, ...newData };
     setAdminData(updated);
     localStorage.setItem("admin", JSON.stringify(updated));
-
-    if (updated?.systemSettings?.theme === "dark") {
-      document.body.classList.add("dark-theme");
-    } else {
-      document.body.classList.remove("dark-theme");
-    }
   };
 
   const logout = () => {

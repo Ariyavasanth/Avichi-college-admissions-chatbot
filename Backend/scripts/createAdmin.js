@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-require("dotenv").config({ path: "../.env" });
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const connectDB = require("../config/Db");
 const Admin = require("../model/Admins");
@@ -16,7 +17,7 @@ async function createAdmin() {
     process.exit(0);
   }
 
-  const initialEmail = process.env.ADMIN_EMAIL || "superadmin@avichicollege.edu";
+  const initialEmail = process.env.ADMIN_EMAIL || "admin@college.com";
   const initialPassword = process.env.ADMIN_PASSWORD || "AvichiAdmin@2026!";
 
   // Pre('save') hook in Admin schema hashes the password, so we just pass plain text here
@@ -24,7 +25,8 @@ async function createAdmin() {
     name: "System Admin",
     email: initialEmail,
     password: initialPassword,
-    role: "superadmin"
+    role: "superadmin",
+    isFirstLogin: true
   });
 
   console.log(`Admin created successfully with email: ${initialEmail}`);

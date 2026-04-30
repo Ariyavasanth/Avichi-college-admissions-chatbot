@@ -50,6 +50,14 @@ const ProfileSettings = () => {
     }
   };
 
+  const handleClear = () => {
+    setName("");
+    setEmail("");
+    setPhone("");
+    setProfileImage("");
+    toast.success("Form cleared");
+  };
+
   const displayTextName = name || "Admin";
 
   return (
@@ -116,10 +124,21 @@ const ProfileSettings = () => {
           />
         </div>
 
-        <button type="submit" className="settings-save-btn" disabled={loading}>
-          {loading ? <Loader2 size={16} className="spin" /> : null}
-          {loading ? "Saving..." : "Save Profile"}
-        </button>
+        <div className="settings-actions">
+          <button type="submit" className="settings-save-btn" disabled={loading}>
+            {loading ? <Loader2 size={16} className="spin" /> : null}
+            {loading ? "Saving..." : "Save Profile"}
+          </button>
+          
+          <button 
+            type="button" 
+            className="settings-clear-btn" 
+            onClick={handleClear}
+            disabled={loading}
+          >
+            Clear Form
+          </button>
+        </div>
       </form>
     </div>
   );

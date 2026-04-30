@@ -6,7 +6,7 @@ import "../../styles/dashboard.css";
 const Sidebar = ({ isOpen, onClose }) => {
   const { adminData, logout } = useAdmin();
   const navigate = useNavigate();
-  const siteName = adminData?.systemSettings?.siteName || "Avichi Admin";
+  const siteName = "Avichi Admin";
 
   const handleLogout = () => {
     logout();
@@ -35,7 +35,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           <ul>
             <li>
               <NavLink
-                to="/"
+                to="/admin/dashboard"
+                end
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={onClose}
               >
@@ -45,7 +46,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
             <li>
               <NavLink
-                to="/courses"
+                to="/admin/dashboard/courses"
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={onClose}
               >
@@ -55,7 +56,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
             <li>
               <NavLink
-                to="/institution"
+                to="/admin/dashboard/institution"
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={onClose}
               >
@@ -65,7 +66,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
             <li>
               <NavLink
-                to="/chatbot-control"
+                to="/admin/dashboard/chatbot-control"
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={onClose}
               >
@@ -75,7 +76,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
             <li>
               <NavLink
-                to="/settings"
+                to="/admin/dashboard/settings"
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={onClose}
               >

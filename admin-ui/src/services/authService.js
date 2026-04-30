@@ -18,21 +18,76 @@ export const loginAdmin = async (email, password) => {
   return data; // { success, token, admin }
 };
 
-export const updateProfile = async (name, email, oldPassword, newPassword) => {
+export const changePassword = async (newPassword) => {
   const token = getToken();
-  const res = await fetch(`${API_URL}/update-profile`, {
+  const res = await fetch(`${API_URL}/change-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ name, email, oldPassword, newPassword }),
+    body: JSON.stringify({ newPassword }),
   });
 
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.message || "Failed to update profile");
+    throw new Error(data.message || "Failed to change password");
+  }
+
+  return data;
+};
+
+export const initialSetup = async (newEmail, newPassword) => {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/initial-setup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newEmail, newPassword }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to complete initial setup");
+  }
+
+  return data;
+};
+
+export const requestEmailChange = async (newEmail) => {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/request-email-change`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newEmail }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to request email change");
+  }
+
+  return data;
+};
+
+export const confirmEmailChange = async (token) => {
+  const res = await fetch(`${API_URL}/confirm-email-change?token=${token}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to confirm email change");
   }
 
   return data;

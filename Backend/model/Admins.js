@@ -3,11 +3,6 @@ const bcrypt = require("bcryptjs");
 
 const adminSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     email: {
       type: String,
       required: true,
@@ -19,31 +14,42 @@ const adminSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    role: {
+    name: {
       type: String,
-      enum: ["admin", "superadmin"],
-      default: "admin",
+      default: "Admin",
     },
     phone: {
       type: String,
-      trim: true,
-      default: ""
+      default: "",
     },
     profileImage: {
-      type: String, // Store base64 or URL
-      default: ""
+      type: String, // Base64
+      default: "",
     },
     systemSettings: {
-      siteName: { type: String, default: "Avichi College Admins" },
-      theme: { type: String, enum: ["light", "dark"], default: "light" },
-      isMaintenanceMode: { type: Boolean, default: false }
+      siteName: { type: String, default: "Avichi Admin" },
+      isMaintenanceMode: { type: Boolean, default: false },
     },
-    notificationSettings: {
-      emailNotifications: { type: Boolean, default: true },
-      newUserAlerts: { type: Boolean, default: true },
-      systemAlerts: { type: Boolean, default: true },
-      weeklyReports: { type: Boolean, default: false }
-    }
+    role: {
+      type: String,
+      default: "admin",
+    },
+    isFirstLogin: {
+      type: Boolean,
+      default: true,
+    },
+    pendingEmail: {
+      type: String,
+      default: null,
+    },
+    emailChangeToken: {
+      type: String,
+      default: null,
+    },
+    emailChangeTokenExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
