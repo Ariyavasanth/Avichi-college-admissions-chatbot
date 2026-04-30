@@ -1,53 +1,30 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 /**
- * Transporter configuration using environment variables.
- * For production, use services like SendGrid, Mailgun, or a corporate SMTP.
+ * Resend API client.
+ * Get your free API key at https://resend.com (100 emails/day free).
+ * Set RESEND_API_KEY in your Render environment variables.
  */
-const createTransporter = () => {
-    // Check if configuration exists
-    if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+const getResend = () => {
+    if (!process.env.RESEND_API_KEY) {
         if (process.env.NODE_ENV !== "production") {
-            console.log("\n📩 [MAILER] Email configuration is incomplete. Emails will be logged to console instead of sent.\n");
+            console.log("\n📩 [MAILER] RESEND_API_KEY is not set. Emails will be logged to console instead of sent.\n");
         } else {
-            console.error("❌ [MAILER] Email configuration missing in .env! Email features are disabled.");
+            console.error("❌ [MAILER] RESEND_API_KEY is missing from environment variables! Email features are disabled.");
         }
         return null;
     }
-
-    const config = {
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT || 587,
-        secure: process.env.EMAIL_PORT == 465, 
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-            rejectUnauthorized: false
-        }
-    };
-
-    // Use service shortcut for Gmail
-    if (process.env.EMAIL_HOST?.includes("gmail.com")) {
-        delete config.host;
-        delete config.port;
-        delete config.secure;
-        config.service = "gmail";
-    }
-
-    return nodemailer.createTransport(config);
+    return new Resend(process.env.RESEND_API_KEY);
 };
-
 
 /**
  * Sends a verification email for email change.
  */
 exports.sendEmailChangeVerification = async (toEmail, token) => {
-    const confirmationLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/confirm-email-change?token=${token}`;
-    const transporter = createTransporter();
+    const confirmationLink = `${process.env.FRONTEND_URL || "http://localhost:5173"}/admin/confirm-email-change?token=${token}`;
+    const resend = getResend();
 
-    if (!transporter) {
+    if (!resend) {
         console.log("------------------------------------------");
         console.log("🔗 VERIFICATION LINK (Copy & Paste):");
         console.log(confirmationLink);
@@ -55,9 +32,11 @@ exports.sendEmailChangeVerification = async (toEmail, token) => {
         return { success: true, loggedToConsole: true };
     }
 
-    const mailOptions = {
-        from: `"Avichi Admin System" <${process.env.EMAIL_USER}>`,
-        to: toEmail,
+    console.log(`📧 [MAILER] Sending verification email via Resend to: ${toEmail}`);
+
+    const { data, error } = await resend.emails.send({
+        from: "Avichi Admin System <onboarding@resend.dev>",
+        to: [toEmail],
         subject: "Confirm Your Email Change",
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
@@ -72,24 +51,31 @@ exports.sendEmailChangeVerification = async (toEmail, token) => {
                 <p style="color: #94a3b8; font-size: 12px;">Avichi College Admissions Chatbot • Admin Security System</p>
             </div>
         `,
-    };
+    });
 
-    return await transporter.sendMail(mailOptions);
+    if (error) {
+        console.error("❌ [MAILER] Resend error:", error);
+        throw new Error(error.message || "Failed to send email via Resend");
+    }
+
+    console.log("✅ [MAILER] Email sent successfully. Resend ID:", data?.id);
+    return { success: true, id: data?.id };
 };
 
 /**
- * Sends a notification to the old email address.
+ * Sends a notification to the old email address after email change.
  */
 exports.sendEmailChangeNotification = async (oldEmail, newEmail) => {
-    const transporter = createTransporter();
-    if (!transporter) {
+    const resend = getResend();
+
+    if (!resend) {
         console.log(`\n🔔 [SECURITY NOTIFICATION] Email for account ${oldEmail} was changed to ${newEmail}\n`);
         return { success: true, loggedToConsole: true };
     }
 
-    const mailOptions = {
-        from: `"Avichi Admin System" <${process.env.EMAIL_USER}>`,
-        to: oldEmail,
+    const { data, error } = await resend.emails.send({
+        from: "Avichi Admin System <onboarding@resend.dev>",
+        to: [oldEmail],
         subject: "Security Alert: Email Address Updated",
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
@@ -105,7 +91,14 @@ exports.sendEmailChangeNotification = async (oldEmail, newEmail) => {
                 <p style="color: #94a3b8; font-size: 12px;">Avichi College Admissions Chatbot • Admin Security System</p>
             </div>
         `,
-    };
+    });
 
-    return await transporter.sendMail(mailOptions);
+    if (error) {
+        console.error("❌ [MAILER] Resend notification error:", error);
+        // Don't throw here — notification failure shouldn't block the main flow
+        return { success: false, error: error.message };
+    }
+
+    console.log("✅ [MAILER] Notification email sent. Resend ID:", data?.id);
+    return { success: true, id: data?.id };
 };
